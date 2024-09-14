@@ -1,6 +1,6 @@
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
-const secretKey = process.env.JWT_SECRET_KEY || 'your_secret_key';
+const secretKey = process.env.JWT_SECRET_KEY || 'liejoto';
 
 // Crear un JWT
 export const createToken = (payload: object, expiresIn: string = '1h'): string => {
@@ -8,11 +8,14 @@ export const createToken = (payload: object, expiresIn: string = '1h'): string =
 };
 
 // Verificar el JWT
-export const verifyToken = (token: string): any => {
+export const verifyTokenJWT = (token: string): JwtPayload | string => {
     try {
-        return jwt.verify(token, secretKey);
+        return jwt.verify(token, secretKey) as JwtPayload;
     } catch (error) {
-        throw new Error('Token inválido');
+        if (error instanceof jwt.JsonWebTokenError) {
+            throw new Error('Token inválido o expirado');
+        }
+        throw new Error('Error al verificar el token');
     }
 };
 

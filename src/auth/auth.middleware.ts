@@ -1,22 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
-import { isTokenRevoked } from '../utils/revokedTokens';
-import { verifyToken } from '../utils/jwtUtils';
+import { verifyTokenJWT } from '../utils/jwtUtils';
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-    const authHeader = req.headers['authorization'];
+    const token = req.cookies['token'];
 
-    if (!authHeader) {
+    if (!token) {
         return res.status(401).json({ message: 'Token no proporcionado' });
     }
 
-    const token = authHeader.split(' ')[1];
-
-    if (isTokenRevoked(token)) {
-        return res.status(401).json({ message: 'Token revocado' });
-    }
-
     try {
-        const decoded = verifyToken(token);
+        const decoded = verifyTokenJWT(token);
         req.body.user = decoded;
         return next();
     } catch (error) {

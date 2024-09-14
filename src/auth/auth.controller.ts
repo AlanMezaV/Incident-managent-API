@@ -1,11 +1,10 @@
 import { Request, Response } from 'express';
 import { createToken } from '../utils/jwtUtils';
 import { StatusCodes } from 'http-status-codes';
-import User from '../users/user.model';
+import { verifyTokenJWT } from '../utils/jwtUtils';
 import { SecurityService } from '../utils/security';
-import { revokeToken } from '../utils/revokedTokens';
+import User from '../users/user.model';
 
-// Iniciar sesión
 export const login = async (req: Request, res: Response): Promise<void> => {
     try {
         const { username, password } = req.body;
@@ -16,7 +15,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        // Verificar la contraseña
         const securityService = new SecurityService();
         const isMatch = await securityService.compare(password, user.password);
 
@@ -25,10 +23,16 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        // Generar el token
         const token = createToken({ username });
 
-        res.status(StatusCodes.OK).json({ message: 'Login successful', token });
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: true,
+            maxAge: 1000 * 60 * 60
+        });
+
+        res.status(StatusCodes.OK).json({ message: 'Login successful' });
     } catch (error) {
         console.error('Error during login:', error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
@@ -70,13 +74,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
         // Guardar el usuario en la base de datos
         const savedUser = await newUser.save();
-
-        // Generar token JWT
-        const token = createToken({ username });
-
         res.status(StatusCodes.CREATED).json({
             message: 'User registered successfully',
-            token,
             user: savedUser
         });
     } catch (error) {
@@ -85,13 +84,33 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
-// Logout
 export const logout = async (req: Request, res: Response): Promise<Response> => {
-    const token = req.headers['authorization']?.split(' ')[1];
+    res.clearCookie('token');
+    return res.status(200).json({ message: 'Sesión cerrada' });
+};
 
-    if (token) {
-        revokeToken(token);
+export const verifyToken = async (req: Request, res: Response): Promise<void> => {
+    const token = req.cookies['token'];
+
+    if (!token) {
+        res.status(StatusCodes.UNAUTHORIZED).json({
+            valid: false
+        });
+        return;
     }
 
-    return res.status(200).json({ message: 'Sesión cerrada' });
+    try {
+        const decoded = verifyTokenJWT(token);
+        if (!decoded) {
+            res.status(StatusCodes.UNAUTHORIZED).json({
+                valid: false
+            });
+            throw new Error('Invalid token');
+        }
+        res.status(StatusCodes.OK).json({ valid: true });
+    } catch (error) {
+        res.status(StatusCodes.UNAUTHORIZED).json({
+            valid: false
+        });
+    }
 };
