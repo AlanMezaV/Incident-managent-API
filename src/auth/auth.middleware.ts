@@ -1,26 +1,25 @@
-// import { Request, Response, NextFunction } from 'express';
-// import jwt from 'jsonwebtoken';
+import { Request, Response, NextFunction } from 'express';
+import { isTokenRevoked } from '../utils/revokedTokens';
+import { verifyToken } from '../utils/jwtUtils';
 
-// const JWT_SECRET = 'yourSecretKey';
+export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+    const authHeader = req.headers['authorization'];
 
-// export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-//     try {
-//         const token = req.headers['authorization'];
+    if (!authHeader) {
+        return res.status(401).json({ message: 'Token no proporcionado' });
+    }
 
-//         if (!token) {
-//             return res.status(401).json({ message: 'Unauthorized' });
-//         }
+    const token = authHeader.split(' ')[1];
 
-//         const decoded = jwt.verify(token, JWT_SECRET);
+    if (isTokenRevoked(token)) {
+        return res.status(401).json({ message: 'Token revocado' });
+    }
 
-//         if (!decoded) {
-//             return res.status(401).json({ message: 'Invalid token' });
-//         }
-
-//         req.user = decoded;
-//         next();
-//     } catch (error) {
-//         console.error('Error in auth middleware:', error);
-//         res.status(500).json({ message: 'Internal server error' });
-//     }
-// };
+    try {
+        const decoded = verifyToken(token);
+        req.body.user = decoded;
+        return next();
+    } catch (error) {
+        return res.status(401).json({ message: 'Token inválido o expirado' });
+    }
+};

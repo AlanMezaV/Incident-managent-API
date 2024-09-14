@@ -2,85 +2,89 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import User from './user.model';
 import { SecurityService } from '../utils/security';
-import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = 'yourSecretKey';
+// // Iniciar sesión
+// export const login = async (req: Request, res: Response): Promise<void> => {
+//     try {
+//         const { username, password } = req.body;
+//         const user = await User.findOne({ username });
 
-// Iniciar sesión
-export const login = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ email });
+//         if (!user) {
+//             res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Invalid email or password' });
+//             return;
+//         }
 
-        if (!user) {
-            res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Invalid email or password' });
-            return;
-        }
+//         const securityService = new SecurityService();
+//         const isMatch = await securityService.compare(password, user.password);
 
-        const securityService = new SecurityService();
-        const isMatch = await securityService.compare(password, user.password);
+//         if (!isMatch) {
+//             res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Invalid email or password' });
+//             return;
+//         }
 
-        if (!isMatch) {
-            res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Invalid email or password' });
-            return;
-        }
+//         // Generar token JWT
+//         const token = jwt.sign({ id: user._id, email: user.email, role: user.role }, JWT_SECRET, {
+//             expiresIn: '1h'
+//         });
 
-        // Generar token JWT
-        const token = jwt.sign({ id: user._id, email: user.email, role: user.role }, JWT_SECRET, {
-            expiresIn: '1h'
-        });
+//         res.status(StatusCodes.OK).json({ message: 'Login successful', token });
+//     } catch (error) {
+//         console.error('Error during login:', error);
+//         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
+//     }
+// };
 
-        res.status(StatusCodes.OK).json({ message: 'Login successful', token });
-    } catch (error) {
-        console.error('Error during login:', error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
-    }
-};
+// // Registrar un usuario
+// export const register = async (req: Request, res: Response): Promise<void> => {
+//     const { name, email, username, password, role, department_id } = req.body;
 
-// Registrar un usuario
-export const register = async (req: Request, res: Response): Promise<void> => {
-    const { name, email, password, role, department_id } = req.body;
+//     try {
+//         // Verificar si el email ya está registrado
+//         const existingUser = await User.findOne({ email });
+//         const existingUsername = await User.findOne({ username });
 
-    try {
-        // Verificar si el email ya está registrado
-        const existingUser = await User.findOne({ email });
+//         if (existingUser) {
+//             res.status(StatusCodes.CONFLICT).json({ message: 'Email already in use' });
+//             return;
+//         }
 
-        if (existingUser) {
-            res.status(StatusCodes.CONFLICT).json({ message: 'Email already in use' });
-            return;
-        }
+//         if (existingUsername) {
+//             res.status(StatusCodes.CONFLICT).json({ message: 'Username already in use' });
+//             return;
+//         }
 
-        // Encriptar la contraseña
-        const securityService = new SecurityService();
-        const hashedPassword = await securityService.hash(password);
+//         // Encriptar la contraseña
+//         const securityService = new SecurityService();
+//         const hashedPassword = await securityService.hash(password);
 
-        // Crear el nuevo usuario
-        const newUser = new User({
-            name,
-            email,
-            password: hashedPassword,
-            role,
-            department_id
-        });
+//         // Crear el nuevo usuario
+//         const newUser = new User({
+//             name,
+//             email,
+//             username,
+//             password: hashedPassword,
+//             role,
+//             department_id
+//         });
 
-        // Guardar el usuario en la base de datos
-        const savedUser = await newUser.save();
+//         // Guardar el usuario en la base de datos
+//         const savedUser = await newUser.save();
 
-        // Generar token JWT
-        const token = jwt.sign(
-            { id: savedUser._id, email: savedUser.email, role: savedUser.role },
-            JWT_SECRET,
-            {
-                expiresIn: '1h'
-            }
-        );
+//         // Generar token JWT
+//         const token = jwt.sign(
+//             { id: savedUser._id, username: savedUser.username, role: savedUser.role },
+//             JWT_SECRET,
+//             {
+//                 expiresIn: '1h'
+//             }
+//         );
 
-        res.status(StatusCodes.CREATED).json({ message: 'User registered successfully', token });
-    } catch (error) {
-        console.error('Error registering user:', error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
-    }
-};
+//         res.status(StatusCodes.CREATED).json({ message: 'User registered successfully', token });
+//     } catch (error) {
+//         console.error('Error registering user:', error);
+//         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
+//     }
+// };
 
 //Obtener todos los usuarios
 export const getUsers = async (req: Request, res: Response): Promise<void> => {
