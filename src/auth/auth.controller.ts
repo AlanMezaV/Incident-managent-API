@@ -29,7 +29,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: true,
-            maxAge: 1000 * 60 * 60
+            maxAge: 1000 * 60 * 60 * 8
         });
 
         res.status(StatusCodes.OK).json({ message: 'Login successful' });
