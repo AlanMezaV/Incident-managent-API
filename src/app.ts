@@ -2,12 +2,12 @@ import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
 import './db';
+import cookieParser from 'cookie-parser';
 import UserRoutes from './users/users.routes';
 import DepartmentRoutes from './departments/departments.routes';
 import BuildingRoutes from './buildings/buildings.routes';
-import BuildingDepartmentRoutes from './buildings-departments/buildings-departments.routes';
 import AuthRoutes from './auth/auth.routes';
-import cookieParser from 'cookie-parser';
+import LocationRoutes from './locations/locations.routes';
 
 const app = express();
 
@@ -25,7 +25,7 @@ app.use(cookieParser());
 app.use('/', UserRoutes);
 app.use('/', DepartmentRoutes);
 app.use('/', BuildingRoutes);
-app.use('/', BuildingDepartmentRoutes);
+app.use('/', LocationRoutes);
 app.use('/', AuthRoutes);
 
 // Error handling

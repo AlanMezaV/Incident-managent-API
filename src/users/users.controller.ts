@@ -3,89 +3,6 @@ import { StatusCodes } from 'http-status-codes';
 import User from './user.model';
 import { SecurityService } from '../utils/security';
 
-// // Iniciar sesión
-// export const login = async (req: Request, res: Response): Promise<void> => {
-//     try {
-//         const { username, password } = req.body;
-//         const user = await User.findOne({ username });
-
-//         if (!user) {
-//             res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Invalid email or password' });
-//             return;
-//         }
-
-//         const securityService = new SecurityService();
-//         const isMatch = await securityService.compare(password, user.password);
-
-//         if (!isMatch) {
-//             res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Invalid email or password' });
-//             return;
-//         }
-
-//         // Generar token JWT
-//         const token = jwt.sign({ id: user._id, email: user.email, role: user.role }, JWT_SECRET, {
-//             expiresIn: '1h'
-//         });
-
-//         res.status(StatusCodes.OK).json({ message: 'Login successful', token });
-//     } catch (error) {
-//         console.error('Error during login:', error);
-//         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
-//     }
-// };
-
-// // Registrar un usuario
-// export const register = async (req: Request, res: Response): Promise<void> => {
-//     const { name, email, username, password, role, department_id } = req.body;
-
-//     try {
-//         // Verificar si el email ya está registrado
-//         const existingUser = await User.findOne({ email });
-//         const existingUsername = await User.findOne({ username });
-
-//         if (existingUser) {
-//             res.status(StatusCodes.CONFLICT).json({ message: 'Email already in use' });
-//             return;
-//         }
-
-//         if (existingUsername) {
-//             res.status(StatusCodes.CONFLICT).json({ message: 'Username already in use' });
-//             return;
-//         }
-
-//         // Encriptar la contraseña
-//         const securityService = new SecurityService();
-//         const hashedPassword = await securityService.hash(password);
-
-//         // Crear el nuevo usuario
-//         const newUser = new User({
-//             name,
-//             email,
-//             username,
-//             password: hashedPassword,
-//             role,
-//             department_id
-//         });
-
-//         // Guardar el usuario en la base de datos
-//         const savedUser = await newUser.save();
-
-//         // Generar token JWT
-//         const token = jwt.sign(
-//             { id: savedUser._id, username: savedUser.username, role: savedUser.role },
-//             JWT_SECRET,
-//             {
-//                 expiresIn: '1h'
-//             }
-//         );
-
-//         res.status(StatusCodes.CREATED).json({ message: 'User registered successfully', token });
-//     } catch (error) {
-//         console.error('Error registering user:', error);
-//         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
-//     }
-// };
-
 //Obtener todos los usuarios
 export const getUsers = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -169,6 +86,23 @@ export const deleteUser = async (req: Request, res: Response) => {
         }
     } catch (error) {
         console.error('Error deleting user:', error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
+    }
+};
+
+export const getUserInfo = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const userId = req.body.user.userId; // Asegúrate de que este sea el nombre correcto del campo en el payload
+        const user = await User.findById(userId).select('-password');
+
+        if (!user) {
+            res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' });
+            return;
+        }
+
+        res.status(StatusCodes.OK).json(user);
+    } catch (error) {
+        console.error('Error getting user info:', error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
 };

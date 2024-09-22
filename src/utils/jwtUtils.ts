@@ -3,7 +3,8 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 const secretKey = process.env.JWT_SECRET_KEY || 'liejoto';
 
 // Crear un JWT
-export const createToken = (payload: object, expiresIn: string = '8h'): string => {
+export const createToken = (userId: string, username: string, expiresIn: string = '8h'): string => {
+    const payload = { userId, username }; // Asegúrate de que estas propiedades sean correctas
     return jwt.sign(payload, secretKey, { expiresIn });
 };
 

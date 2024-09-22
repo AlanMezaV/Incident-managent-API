@@ -23,7 +23,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        const token = createToken({ username });
+        const token = createToken(user.id.toString(), user.username);
 
         res.cookie('token', token, {
             httpOnly: true,

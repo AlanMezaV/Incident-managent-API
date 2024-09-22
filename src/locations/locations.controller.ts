@@ -33,7 +33,9 @@ export const getLocationById = async (req: Request, res: Response): Promise<void
 export const createLocation = async (req: Request, res: Response) => {
     const location = new Location({
         name: req.body.name,
-        address: req.body.address
+        type: req.body.type,
+        description: req.body.description,
+        building_id: req.body.building_id
     });
     try {
         const newLocation = await location.save();
@@ -99,5 +101,42 @@ export const getLocationsByBuildingId = async (req: Request, res: Response) => {
     } catch (error) {
         console.error('Error getting locations by building id:', error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
+    }
+};
+
+export const searchLocations = async (req: Request, res: Response) => {
+    const { name, type, description, buildingId } = req.query;
+
+    try {
+        const filter: any = {};
+
+        if (name) {
+            filter.name = { $regex: name, $options: 'i' };
+        }
+
+        if (type) {
+            filter.type = { $regex: type, $options: 'i' };
+        }
+
+        if (description) {
+            filter.description = { $regex: description, $options: 'i' };
+        }
+
+        if (buildingId) {
+            filter.building_id = buildingId;
+        }
+
+        const locations = await Location.find(filter);
+
+        if (locations.length === 0) {
+            return res.status(StatusCodes.NOT_FOUND).json({ message: 'No locations found' });
+        }
+
+        return res.status(StatusCodes.OK).json(locations);
+    } catch (error) {
+        console.error('Error searching locations:', error);
+        return res
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .json({ message: 'Internal server error' });
     }
 };
