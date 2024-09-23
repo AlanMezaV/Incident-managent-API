@@ -53,10 +53,10 @@ export const createLocation = async (req: Request, res: Response) => {
 export const updateLocation = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const { name, address } = req.body;
+        const { name, description, type } = req.body;
         const updatedLocation = await Location.findByIdAndUpdate(
             id,
-            { name, address },
+            { name, description, type },
             { new: true }
         );
         if (updatedLocation) {
