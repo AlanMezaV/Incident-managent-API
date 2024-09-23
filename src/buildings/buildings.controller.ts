@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import Building from './building.model';
 import Location from '../locations/location.model';
+import User from '../users/user.model';
 
 // type BuildingData = {
 //     name: string;
@@ -131,9 +132,17 @@ export const deleteBuilding = async (req: Request, res: Response) => {
 };
 
 export const searchBuildings = async (req: Request, res: Response) => {
+    const userId = req.body.user.userId;
     const { name, description, isShared, departmentId } = req.query;
 
     try {
+        // Primero, obtenemos el department_id del usuario
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' });
+        }
+        const userDepartmentId = user.department_id;
+
         const filter: any = {};
 
         if (name) {
@@ -145,7 +154,12 @@ export const searchBuildings = async (req: Request, res: Response) => {
         }
 
         if (isShared !== undefined) {
-            filter.isShared = isShared === 'true';
+            const isSharedBoolean = isShared === 'true';
+            filter.isShared = isSharedBoolean;
+
+            if (isSharedBoolean) {
+                filter.department_id = { $nin: [userDepartmentId] };
+            }
         }
 
         if (departmentId) {

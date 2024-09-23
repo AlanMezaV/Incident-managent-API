@@ -92,7 +92,7 @@ export const deleteUser = async (req: Request, res: Response) => {
 
 export const getUserInfo = async (req: Request, res: Response): Promise<void> => {
     try {
-        const userId = req.body.user.userId; // Asegúrate de que este sea el nombre correcto del campo en el payload
+        const userId = req.body.user.userId;
         const user = await User.findById(userId).select('-password');
 
         if (!user) {
