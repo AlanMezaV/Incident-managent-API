@@ -3,14 +3,8 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import Building from './building.model';
 import Location from '../locations/location.model';
+import Device from '../devices/device.model';
 import User from '../users/user.model';
-
-// type BuildingData = {
-//     name: string;
-//     description?: string;
-//     isShared: boolean;
-//     department_id: mongoose.Types.ObjectId[];
-// };
 
 // Get all buildings
 export const getBuildings = async (req: Request, res: Response): Promise<void> => {
@@ -130,7 +124,6 @@ export const deleteBuilding = async (req: Request, res: Response) => {
             .json({ message: 'Internal server error' });
     }
 };
-
 export const searchBuildings = async (req: Request, res: Response) => {
     const userId = req.body.user.userId;
     const { name, description, isShared, departmentId } = req.query;
@@ -172,7 +165,29 @@ export const searchBuildings = async (req: Request, res: Response) => {
             return res.status(StatusCodes.NOT_FOUND).json({ message: 'No buildings found' });
         }
 
-        return res.status(StatusCodes.OK).json(buildings);
+        // Contar dispositivos por cada edificio y agregar totalDevices
+        const buildingsWithDevices = await Promise.all(
+            buildings.map(async building => {
+                // Encontrar ubicaciones que coincidan con el department_id del edificio
+                const locations = await Location.find({
+                    building_id: building._id,
+                    department_id: departmentId
+                });
+
+                // Contar los dispositivos asociados a las ubicaciones encontradas
+                const totalDevices = await Device.countDocuments({
+                    location_id: { $in: locations.map(loc => loc._id) }
+                });
+
+                // Devolver el edificio con la propiedad totalDevices
+                return {
+                    ...building.toObject(),
+                    totalDevices
+                };
+            })
+        );
+
+        return res.status(StatusCodes.OK).json(buildingsWithDevices);
     } catch (error) {
         console.error('Error searching buildings:', error);
         return res

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import Location from './location.model';
+import Device from '../devices/device.model';
 
 // Get all locations
 export const getLocations = async (req: Request, res: Response): Promise<void> => {
@@ -35,7 +36,8 @@ export const createLocation = async (req: Request, res: Response) => {
         name: req.body.name,
         type: req.body.type,
         description: req.body.description,
-        building_id: req.body.building_id
+        building_id: req.body.building_id,
+        department_id: req.body.department_id
     });
     try {
         const newLocation = await location.save();
@@ -105,7 +107,7 @@ export const getLocationsByBuildingId = async (req: Request, res: Response) => {
 };
 
 export const searchLocations = async (req: Request, res: Response) => {
-    const { name, type, description, buildingId } = req.query;
+    const { name, type, description, buildingId, departmentId } = req.query;
 
     try {
         const filter: any = {};
@@ -126,6 +128,10 @@ export const searchLocations = async (req: Request, res: Response) => {
             filter.building_id = buildingId;
         }
 
+        if (departmentId) {
+            filter.department_id = departmentId;
+        }
+
         const locations = await Location.find(filter);
 
         if (locations.length === 0) {
@@ -135,6 +141,49 @@ export const searchLocations = async (req: Request, res: Response) => {
         return res.status(StatusCodes.OK).json(locations);
     } catch (error) {
         console.error('Error searching locations:', error);
+        return res
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .json({ message: 'Internal server error' });
+    }
+};
+
+export const getLocationsWithDevices = async (req: Request, res: Response) => {
+    try {
+        const { buildingId, departmentId } = req.query;
+
+        // Verificar que location_id y department_id estén presentes
+        if (!buildingId || !departmentId) {
+            return res
+                .status(StatusCodes.BAD_REQUEST)
+                .json({ message: 'location_id and department_id are required' });
+        }
+
+        // Buscar las ubicaciones que coincidan con location_id y department_id
+        const locations = await Location.find({
+            building_id: buildingId,
+            department_id: departmentId
+        });
+
+        if (locations.length === 0) {
+            return res.status(StatusCodes.NOT_FOUND).json({ message: 'No locations found' });
+        }
+
+        const data = await Promise.all(
+            locations.map(async location => {
+                // Contar el número de dispositivos que tienen el mismo location_id
+                const totalDevices = await Device.countDocuments({ location_id: location._id });
+
+                // Agregar el totalDevices dentro del objeto location
+                return {
+                    ...location.toObject(), // Convertimos el documento de Mongoose a un objeto plano
+                    totalDevices
+                };
+            })
+        );
+
+        return res.status(StatusCodes.OK).json(data);
+    } catch (error) {
+        console.error('Error getting locations and devices:', error);
         return res
             .status(StatusCodes.INTERNAL_SERVER_ERROR)
             .json({ message: 'Internal server error' });

@@ -8,6 +8,7 @@ import DepartmentRoutes from './departments/departments.routes';
 import BuildingRoutes from './buildings/buildings.routes';
 import AuthRoutes from './auth/auth.routes';
 import LocationRoutes from './locations/locations.routes';
+import DeviceRoutes from './devices/devices.routes';
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use('/', DepartmentRoutes);
 app.use('/', BuildingRoutes);
 app.use('/', LocationRoutes);
 app.use('/', AuthRoutes);
+app.use('/', DeviceRoutes);
 
 // Error handling
 app.use((req, res, next) => {

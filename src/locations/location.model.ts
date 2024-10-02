@@ -5,6 +5,7 @@ interface ILocation extends Document {
     type: string;
     description: string;
     building_id: Types.ObjectId;
+    department_id: Types.ObjectId;
 }
 
 const locationSchema = new Schema<ILocation>(
@@ -12,7 +13,8 @@ const locationSchema = new Schema<ILocation>(
         name: { type: String, required: true },
         type: { type: String, required: true },
         description: { type: String },
-        building_id: { type: Schema.Types.ObjectId, ref: 'Building', required: true }
+        building_id: { type: Schema.Types.ObjectId, ref: 'Building', required: true },
+        department_id: { type: Schema.Types.ObjectId, ref: 'Department', required: true }
     },
     { timestamps: { createdAt: 'created_at' } }
 );

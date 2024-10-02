@@ -6,7 +6,8 @@ import {
     updateLocation,
     deleteLocation,
     getLocationsByBuildingId,
-    searchLocations
+    searchLocations,
+    getLocationsWithDevices
 } from './locations.controller';
 import { authMiddleware } from '../auth/auth.middleware';
 
@@ -19,5 +20,6 @@ router.put('/locations/:id', updateLocation);
 router.delete('/locations/:id', deleteLocation);
 router.get('/locations/buildings/:id', getLocationsByBuildingId);
 router.get('/locations-search', authMiddleware, searchLocations);
+router.get('/locations-with-devices', getLocationsWithDevices);
 
 export default router;
