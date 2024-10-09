@@ -2,6 +2,16 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import Device from './device.model';
 import Location from '../locations/location.model';
+import {
+    IComputerSpecs,
+    ILaptop,
+    IPrinter,
+    ISwitch,
+    IRouter,
+    INoBreak,
+    IVoltageRegulator,
+    IProjector
+} from '../utils/enum/devicesTypes';
 
 // Get all devices
 export const getDevices = async (req: Request, res: Response): Promise<void> => {

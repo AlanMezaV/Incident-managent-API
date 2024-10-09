@@ -41,7 +41,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
 // Registrar un usuario
 export const register = async (req: Request, res: Response): Promise<void> => {
-    const { name, email, username, password, role, department_id } = req.body;
+    const { name, email, username, password, role, position, department_id } = req.body;
 
     try {
         // Verificar si el email y el username ya está registrado
@@ -69,6 +69,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
             username,
             password: hashedPassword,
             role,
+            position,
             department_id
         });
 
@@ -86,7 +87,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
 export const logout = async (req: Request, res: Response): Promise<Response> => {
     res.clearCookie('token');
-    return res.status(200).json({ message: 'Sesión cerrada' });
+    return res.status(200).json({ message: 'Session finished' });
 };
 
 export const verifyToken = async (req: Request, res: Response): Promise<void> => {

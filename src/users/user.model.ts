@@ -6,6 +6,7 @@ interface IUser extends Document {
     email: string;
     password: string;
     role: string;
+    position: string;
     department_id: Types.ObjectId;
 }
 
@@ -16,6 +17,7 @@ const userSchema = new Schema<IUser>(
         email: { type: String, required: true },
         password: { type: String, required: true },
         role: { type: String, required: true },
+        position: { type: String, required: true },
         department_id: { type: Schema.Types.ObjectId, ref: 'Department' }
     },
     { timestamps: { createdAt: 'created_at' } }
