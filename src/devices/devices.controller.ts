@@ -130,8 +130,17 @@ export const getDeviceById = async (req: Request, res: Response): Promise<void> 
     }
 };
 export const createDevice = async (req: Request, res: Response) => {
-    const { name, type, specs, purchaseDate, warrantyYears, deviceModel, brand, location_id } =
-        req.body;
+    const {
+        name,
+        type,
+        status,
+        specs,
+        purchaseDate,
+        warrantyYears,
+        deviceModel,
+        brand,
+        location_id
+    } = req.body;
 
     if (!validateSpecs(type, specs)) {
         return res
@@ -144,6 +153,7 @@ export const createDevice = async (req: Request, res: Response) => {
             name,
             type,
             specs,
+            status,
             purchaseDate,
             warrantyYears,
             deviceModel,
@@ -163,8 +173,17 @@ export const createDevice = async (req: Request, res: Response) => {
 
 export const updateDevice = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { name, type, specs, purchaseDate, warrantyYears, deviceModel, brand, location_id } =
-        req.body;
+    const {
+        name,
+        type,
+        specs,
+        status,
+        purchaseDate,
+        warrantyYears,
+        deviceModel,
+        brand,
+        location_id
+    } = req.body;
 
     try {
         const device = await Device.findById(id);
@@ -175,6 +194,7 @@ export const updateDevice = async (req: Request, res: Response) => {
 
         device.name = name || device.name;
         device.type = type || device.type;
+        device.status = status || device.status;
         device.purchaseDate = purchaseDate || device.purchaseDate;
         device.warrantyYears = warrantyYears || device.warrantyYears;
         device.deviceModel = deviceModel || device.deviceModel;
