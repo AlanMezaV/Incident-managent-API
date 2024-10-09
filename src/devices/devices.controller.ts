@@ -13,6 +13,96 @@ import {
     IProjector
 } from '../utils/enum/devicesTypes';
 
+const validateSpecs = (type: string, specs: any): boolean => {
+    switch (type) {
+        case 'PC':
+            const {
+                os: pcOs,
+                motherboard: pcMotherboard,
+                cpu: pcCpu,
+                ram: pcRam,
+                ramType: pcRamType,
+                storage: pcStorage,
+                powerSupply: pcPowerSupply
+            } = specs as IComputerSpecs;
+            if (
+                !pcOs ||
+                !pcMotherboard ||
+                !pcCpu ||
+                !pcRam ||
+                !pcRamType ||
+                !pcStorage ||
+                !pcPowerSupply
+            ) {
+                return false;
+            }
+            break;
+        case 'LAPTOP':
+            const {
+                os: laptopOs,
+                storage: laptopStorage,
+                cpu: laptopCpu,
+                ram: laptopRam,
+                ramType: laptopRamType
+            } = specs as ILaptop;
+            if (!laptopOs || !laptopStorage || !laptopCpu || !laptopRam || !laptopRamType) {
+                return false;
+            }
+            break;
+        case 'PRINTER':
+            const {
+                printerType,
+                tonerType,
+                printerInk,
+                scanner: printerScanner,
+                wifiConnection: printerWifiConnection
+            } = specs as IPrinter;
+            if (
+                !printerType ||
+                !tonerType ||
+                !printerInk ||
+                !printerScanner ||
+                !printerWifiConnection
+            ) {
+                return false;
+            }
+            break;
+        case 'SWITCH':
+            const { ports: switchPorts, macAddress: switchMacAddress } = specs as ISwitch;
+            if (!switchPorts || !switchMacAddress) {
+                return false;
+            }
+            break;
+        case 'ROUTER':
+            const { routerType, ports: routerPorts } = specs as IRouter;
+            if (!routerType || !routerPorts) {
+                return false;
+            }
+            break;
+        case 'NO-BREAK':
+            const { powerCapacity, ports: noBreakPorts, backupTime } = specs as INoBreak;
+            if (!powerCapacity || !noBreakPorts || !backupTime) {
+                return false;
+            }
+            break;
+        case 'VOLTAGE-REGULATOR':
+            const { powerCapacity: vrPowerCapacity, ports: vrPorts } = specs as IVoltageRegulator;
+            if (!vrPowerCapacity || !vrPorts) {
+                return false;
+            }
+            break;
+        case 'PROJECTOR':
+            const { resolution, connectivity } = specs as IProjector;
+            if (!resolution || !connectivity) {
+                return false;
+            }
+            break;
+        default:
+            return false;
+    }
+    return true;
+};
+
 // Get all devices
 export const getDevices = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -39,26 +129,20 @@ export const getDeviceById = async (req: Request, res: Response): Promise<void> 
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
 };
-
-// Create a device
 export const createDevice = async (req: Request, res: Response) => {
-    const {
-        name,
-        type,
-        status,
-        specs,
-        purchaseDate,
-        warrantyYears,
-        deviceModel,
-        brand,
-        location_id
-    } = req.body;
+    const { name, type, specs, purchaseDate, warrantyYears, deviceModel, brand, location_id } =
+        req.body;
+
+    if (!validateSpecs(type, specs)) {
+        return res
+            .status(StatusCodes.BAD_REQUEST)
+            .json({ message: 'Invalid device specifications for the type provided' });
+    }
 
     try {
         const device = new Device({
             name,
             type,
-            status,
             specs,
             purchaseDate,
             warrantyYears,
@@ -77,20 +161,10 @@ export const createDevice = async (req: Request, res: Response) => {
     }
 };
 
-// Update a device by id
 export const updateDevice = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const {
-        name,
-        type,
-        status,
-        specs,
-        purchaseDate,
-        warrantyYears,
-        deviceModel,
-        brand,
-        location_id
-    } = req.body;
+    const { name, type, specs, purchaseDate, warrantyYears, deviceModel, brand, location_id } =
+        req.body;
 
     try {
         const device = await Device.findById(id);
@@ -99,16 +173,23 @@ export const updateDevice = async (req: Request, res: Response) => {
             return res.status(StatusCodes.NOT_FOUND).json({ message: 'Device not found' });
         }
 
-        // Actualizar los campos del dispositivo
         device.name = name || device.name;
         device.type = type || device.type;
-        device.status = status || device.status;
-        device.specs = { ...device.specs, ...specs }; // Actualizar specs
         device.purchaseDate = purchaseDate || device.purchaseDate;
         device.warrantyYears = warrantyYears || device.warrantyYears;
         device.deviceModel = deviceModel || device.deviceModel;
         device.brand = brand || device.brand;
         device.location_id = location_id || device.location_id;
+
+        if (specs) {
+            device.specs = { ...device.specs, ...specs };
+        }
+
+        if (device.type && device.specs && !validateSpecs(device.type, device.specs)) {
+            return res
+                .status(StatusCodes.BAD_REQUEST)
+                .json({ message: 'Invalid device specifications for the type provided' });
+        }
 
         const updatedDevice = await device.save();
         return res.status(StatusCodes.OK).json(updatedDevice);
