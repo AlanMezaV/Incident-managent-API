@@ -278,6 +278,40 @@ export const searchDevices = async (req: Request, res: Response) => {
     }
 };
 
+export const getDevicesByDepartmentSearch = async (req: Request, res: Response) => {
+    const { department_id, building_id } = req.query;
+
+    try {
+        const locations = await Location.find({ department_id });
+
+        if (!locations || locations.length === 0) {
+            return res
+                .status(StatusCodes.NOT_FOUND)
+                .json({ message: 'No locations found for the given department' });
+        }
+
+        let filteredLocations = locations;
+        if (building_id && building_id !== 'ALL') {
+            filteredLocations = locations.filter(location =>
+                location.building_id.equals(building_id as string)
+            );
+        }
+
+        const locationIds = filteredLocations.map(location => location._id);
+
+        const devices = await Device.find({ location_id: { $in: locationIds } }).populate(
+            'location_id'
+        );
+
+        return res.status(StatusCodes.OK).json(devices);
+    } catch (error) {
+        console.error('Error fetching devices by department_id:', error);
+        return res
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .json({ message: 'Internal server error' });
+    }
+};
+
 export const getDevicesByDepartmentId = async (req: Request, res: Response) => {
     const { department_id } = req.params;
     try {
