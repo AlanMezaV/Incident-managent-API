@@ -14,89 +14,74 @@ import {
 } from '../utils/enum/devicesTypes';
 
 const validateSpecs = (type: string, specs: any): boolean => {
+    console.log('Received specs:', specs);
+    console.log('Received type:', type);
     switch (type) {
-        case 'PC':
-            const {
-                os: pcOs,
-                motherboard: pcMotherboard,
-                cpu: pcCpu,
-                ram: pcRam,
-                ramType: pcRamType,
-                storage: pcStorage,
-                powerSupply: pcPowerSupply
-            } = specs as IComputerSpecs;
-            if (
-                !pcOs ||
-                !pcMotherboard ||
-                !pcCpu ||
-                !pcRam ||
-                !pcRamType ||
-                !pcStorage ||
-                !pcPowerSupply
-            ) {
+        case 'PC': {
+            const { os, motherboard, cpu, ram, storage, powerSupply } = specs as IComputerSpecs;
+
+            if (!os || !motherboard || !cpu || !ram || !storage || !powerSupply) {
                 return false;
             }
             break;
-        case 'LAPTOP':
-            const {
-                os: laptopOs,
-                storage: laptopStorage,
-                cpu: laptopCpu,
-                ram: laptopRam,
-                ramType: laptopRamType
-            } = specs as ILaptop;
-            if (!laptopOs || !laptopStorage || !laptopCpu || !laptopRam || !laptopRamType) {
+        }
+
+        case 'LAPTOP': {
+            const { os, storage, cpu, ram, ramType } = specs as ILaptop;
+
+            if (!os || !cpu || !ram || !storage || !ramType) {
                 return false;
             }
             break;
-        case 'PRINTER':
-            const {
-                printerType,
-                tonerType,
-                printerInk,
-                scanner: printerScanner,
-                wifiConnection: printerWifiConnection
-            } = specs as IPrinter;
-            if (
-                !printerType ||
-                !tonerType ||
-                !printerInk ||
-                !printerScanner ||
-                !printerWifiConnection
-            ) {
+        }
+
+        case 'PRINTER': {
+            const { printerType, printerInk, scanner } = specs as IPrinter;
+            if (!printerType || !printerInk || !scanner) {
                 return false;
             }
             break;
-        case 'SWITCH':
-            const { ports: switchPorts, macAddress: switchMacAddress } = specs as ISwitch;
-            if (!switchPorts || !switchMacAddress) {
+        }
+
+        case 'SWITCH': {
+            const { ports, macAddress } = specs as ISwitch;
+            if (!ports || !macAddress) {
                 return false;
             }
             break;
-        case 'ROUTER':
-            const { routerType, ports: routerPorts } = specs as IRouter;
-            if (!routerType || !routerPorts) {
+        }
+
+        case 'ROUTER': {
+            const { routerType, ports } = specs as IRouter;
+            if (!routerType || !ports) {
                 return false;
             }
             break;
-        case 'NO-BREAK':
-            const { powerCapacity, ports: noBreakPorts, backupTime } = specs as INoBreak;
-            if (!powerCapacity || !noBreakPorts || !backupTime) {
+        }
+
+        case 'NO-BREAK': {
+            const { powerCapacity, ports, backupTime } = specs as INoBreak;
+            if (!powerCapacity || !ports || !backupTime) {
                 return false;
             }
             break;
-        case 'VOLTAGE-REGULATOR':
-            const { powerCapacity: vrPowerCapacity, ports: vrPorts } = specs as IVoltageRegulator;
-            if (!vrPowerCapacity || !vrPorts) {
+        }
+
+        case 'VOLTAGE-REGULATOR': {
+            const { powerCapacity, ports } = specs as IVoltageRegulator;
+            if (!powerCapacity || !ports) {
                 return false;
             }
             break;
-        case 'PROJECTOR':
+        }
+
+        case 'PROJECTOR': {
             const { resolution, connectivity } = specs as IProjector;
             if (!resolution || !connectivity) {
                 return false;
             }
             break;
+        }
         default:
             return false;
     }
