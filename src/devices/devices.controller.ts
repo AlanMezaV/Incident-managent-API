@@ -329,3 +329,29 @@ export const getDevicesByDepartmentId = async (req: Request, res: Response) => {
             .json({ message: 'Internal server error' });
     }
 };
+
+export const getNumberDevicesByDepartmentId = async (req: Request, res: Response) => {
+    const { department_id } = req.params;
+    try {
+        const locations = await Location.find({ department_id });
+
+        if (!locations || locations.length === 0) {
+            return res
+                .status(StatusCodes.NOT_FOUND)
+                .json({ message: 'No locations found for the given department' });
+        }
+
+        const locationIds = locations.map(location => location._id);
+
+        const devices = await Device.find({ location_id: { $in: locationIds } })
+            .populate('location_id')
+            .countDocuments();
+
+        return res.status(StatusCodes.OK).json(devices);
+    } catch (error) {
+        console.error('Error fetching devices by department_id:', error);
+        return res
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .json({ message: 'Internal server error' });
+    }
+};

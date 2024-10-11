@@ -7,7 +7,8 @@ import {
     deleteDevice,
     searchDevices,
     getDevicesByDepartmentId,
-    getDevicesByDepartmentSearch
+    getDevicesByDepartmentSearch,
+    getNumberDevicesByDepartmentId
 } from './devices.controller';
 import { authMiddleware } from '../auth/auth.middleware';
 
@@ -21,5 +22,6 @@ router.delete('/devices/:id', authMiddleware, deleteDevice);
 router.get('/devices-search', searchDevices);
 router.get('/devices-by-department/:department_id', getDevicesByDepartmentId);
 router.get('/devices-by-department-search', getDevicesByDepartmentSearch);
+router.get('/number-devices-by-department/:department_id', getNumberDevicesByDepartmentId);
 
 export default router;
