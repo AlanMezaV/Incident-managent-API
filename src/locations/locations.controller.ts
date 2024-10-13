@@ -37,7 +37,8 @@ export const createLocation = async (req: Request, res: Response) => {
         type: req.body.type,
         description: req.body.description,
         building_id: req.body.building_id,
-        department_id: req.body.department_id
+        department_id: req.body.department_id,
+        location_manager: req.body.location_manager
     });
     try {
         const newLocation = await location.save();
@@ -55,10 +56,10 @@ export const createLocation = async (req: Request, res: Response) => {
 export const updateLocation = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const { name, description, type } = req.body;
+        const { name, description, type, location_manager } = req.body;
         const updatedLocation = await Location.findByIdAndUpdate(
             id,
-            { name, description, type },
+            { name, description, type, location_manager },
             { new: true }
         );
         if (updatedLocation) {
@@ -98,7 +99,7 @@ export const deleteLocation = async (req: Request, res: Response) => {
 export const getLocationsByBuildingId = async (req: Request, res: Response) => {
     try {
         const { building_id } = req.params;
-        const locations = await Location.find({ building_id });
+        const locations = await Location.find({ building_id }).populate('location_manager');
         res.status(StatusCodes.OK).json(locations);
     } catch (error) {
         console.error('Error getting locations by building id:', error);
@@ -132,7 +133,7 @@ export const searchLocations = async (req: Request, res: Response) => {
             filter.department_id = departmentId;
         }
 
-        const locations = await Location.find(filter);
+        const locations = await Location.find(filter).populate('location_manager');
 
         if (locations.length === 0) {
             return res.status(StatusCodes.NOT_FOUND).json({ message: 'No locations found' });
@@ -162,7 +163,7 @@ export const getLocationsWithDevices = async (req: Request, res: Response) => {
         const locations = await Location.find({
             building_id: buildingId,
             department_id: departmentId
-        });
+        }).populate('location_manager');
 
         if (locations.length === 0) {
             return res.status(StatusCodes.NOT_FOUND).json({ message: 'No locations found' });

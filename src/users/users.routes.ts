@@ -5,7 +5,8 @@ import {
     updateUser,
     deleteUser,
     getUserInfo,
-    usersSearch
+    usersSearch,
+    userDepartmentOptions
 } from './users.controller';
 import { authMiddleware } from '../auth/auth.middleware';
 
@@ -17,5 +18,6 @@ router.put('/users/:id', authMiddleware, updateUser);
 router.delete('/users/:id', authMiddleware, deleteUser);
 router.get('/info', authMiddleware, getUserInfo);
 router.get('/users-search', authMiddleware, usersSearch);
+router.get('/users-options-department/:department_id', authMiddleware, userDepartmentOptions);
 
 export default router;

@@ -144,3 +144,18 @@ export const usersSearch = async (req: Request, res: Response) => {
             .json({ message: 'Internal server error' });
     }
 };
+
+export const userDepartmentOptions = async (req: Request, res: Response) => {
+    const { department_id } = req.params;
+
+    try {
+        const users = await User.find({ department_id }).select('-password');
+
+        return res.status(StatusCodes.OK).json(users);
+    } catch (error) {
+        console.error('Error getting users:', error);
+        return res
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .json({ message: 'Internal server error' });
+    }
+};

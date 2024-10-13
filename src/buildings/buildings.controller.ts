@@ -35,14 +35,15 @@ export const getBuildingById = async (req: Request, res: Response): Promise<void
 
 // Create a building
 export const createBuilding = async (req: Request, res: Response) => {
-    const { name, description, isShared, department_id } = req.body;
+    const { name, description, isShared, department_id, build_manager } = req.body;
 
     try {
         const building = new Building({
             name,
             description,
             isShared,
-            department_id: []
+            department_id: [],
+            build_manager
         });
 
         if (isShared && Array.isArray(department_id)) {
@@ -66,7 +67,7 @@ export const createBuilding = async (req: Request, res: Response) => {
 // Update a building by id
 export const updateBuilding = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { name, description, isShared, department_id } = req.body;
+    const { name, description, isShared, department_id, build_manager } = req.body;
 
     try {
         const building = await Building.findById(id);
@@ -78,6 +79,7 @@ export const updateBuilding = async (req: Request, res: Response) => {
         building.name = name || building.name;
         building.description = description || building.description;
         building.isShared = isShared ?? building.isShared;
+        building.build_manager = build_manager || building.build_manager;
 
         if (isShared && Array.isArray(department_id)) {
             building.department_id = department_id;
@@ -126,10 +128,9 @@ export const deleteBuilding = async (req: Request, res: Response) => {
 };
 export const searchBuildings = async (req: Request, res: Response) => {
     const userId = req.body.user.userId;
-    const { name, description, isShared, departmentId } = req.query;
+    const { name, description, isShared, departmentId, build_manager } = req.query;
 
     try {
-        // Primero, obtenemos el department_id del usuario
         const user = await User.findById(userId);
         if (!user) {
             return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' });
@@ -159,27 +160,26 @@ export const searchBuildings = async (req: Request, res: Response) => {
             filter.department_id = departmentId;
         }
 
-        const buildings = await Building.find(filter);
+        if (build_manager) {
+            filter.build_manager = build_manager;
+        }
+
+        const buildings = await Building.find(filter).populate('build_manager');
 
         if (buildings.length === 0) {
             return res.status(StatusCodes.NOT_FOUND).json({ message: 'No buildings found' });
         }
 
-        // Contar dispositivos por cada edificio y agregar totalDevices
         const buildingsWithDevices = await Promise.all(
             buildings.map(async building => {
-                // Encontrar ubicaciones que coincidan con el department_id del edificio
                 const locations = await Location.find({
                     building_id: building._id,
                     department_id: departmentId
                 });
 
-                // Contar los dispositivos asociados a las ubicaciones encontradas
                 const totalDevices = await Device.countDocuments({
                     location_id: { $in: locations.map(loc => loc._id) }
                 });
-
-                // Devolver el edificio con la propiedad totalDevices
                 return {
                     ...building.toObject(),
                     totalDevices
