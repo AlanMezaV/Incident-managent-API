@@ -106,3 +106,41 @@ export const getUserInfo = async (req: Request, res: Response): Promise<void> =>
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
 };
+
+export const usersSearch = async (req: Request, res: Response) => {
+    const { name, username, email, position, department_id } = req.query;
+
+    try {
+        const filter: any = {};
+
+        if (name) {
+            filter.name = { $regex: name, $options: 'i' };
+        }
+
+        if (username) {
+            filter.username = { $regex: username, $options: 'i' };
+        }
+
+        if (email) {
+            filter.email = { $regex: email, $options: 'i' };
+        }
+
+        if (position && position !== 'ALL') {
+            filter.position = { $regex: position, $options: 'i' };
+        }
+
+        if (department_id) {
+            filter.department_id = department_id;
+            filter.role = { $ne: 'ADMIN_DEPARTMENT' };
+        }
+
+        const users = await User.find(filter).select('-password');
+
+        return res.status(StatusCodes.OK).json(users);
+    } catch (error) {
+        console.error('Error searching users:', error);
+        return res
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .json({ message: 'Internal server error' });
+    }
+};

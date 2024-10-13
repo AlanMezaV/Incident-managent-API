@@ -14,8 +14,6 @@ import {
 } from '../utils/enum/devicesTypes';
 
 const validateSpecs = (type: string, specs: any): boolean => {
-    console.log('Received specs:', specs);
-    console.log('Received type:', type);
     switch (type) {
         case 'PC': {
             const { os, motherboard, cpu, ram, storage, powerSupply } = specs as IComputerSpecs;
