@@ -4,6 +4,60 @@ import { StatusCodes } from 'http-status-codes';
 import { verifyTokenJWT } from '../utils/jwtUtils';
 import { SecurityService } from '../utils/security';
 import User from '../users/user.model';
+import cloudinary from '../utils/cloudinaryConfig';
+
+export const register = async (req: Request, res: Response): Promise<void> => {
+    const { name, email, username, password, role, position, department_id } = req.body;
+
+    try {
+        // Verificar si el email y el username ya están registrados
+        const existingUser = await User.findOne({ email });
+        const existingUsername = await User.findOne({ username });
+
+        if (existingUser) {
+            res.status(StatusCodes.CONFLICT).json({ message: 'Email already in use' });
+            return;
+        }
+
+        if (existingUsername) {
+            res.status(StatusCodes.CONFLICT).json({ message: 'Username already in use' });
+            return;
+        }
+
+        // Encriptar la contraseña
+        const securityService = new SecurityService();
+        const hashedPassword = await securityService.hash(password);
+
+        // Subir la imagen a Cloudinary
+        let imageUrl: string | undefined;
+        if (req.file) {
+            const result = await cloudinary.uploader.upload(req.file.path);
+            imageUrl = result.secure_url; // URL de la imagen subida
+        }
+
+        // Crear el nuevo usuario
+        const newUser = new User({
+            name,
+            email,
+            username,
+            password: hashedPassword,
+            role,
+            position,
+            department_id,
+            imageUrl // Guardar la URL de la imagen si se subió
+        });
+
+        // Guardar el usuario en la base de datos
+        const savedUser = await newUser.save();
+        res.status(StatusCodes.CREATED).json({
+            message: 'User registered successfully',
+            user: savedUser
+        });
+    } catch (error) {
+        console.error('Error registering user:', error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
+    }
+};
 
 export const login = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -35,52 +89,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         res.status(StatusCodes.OK).json({ message: 'Login successful' });
     } catch (error) {
         console.error('Error during login:', error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
-    }
-};
-
-// Registrar un usuario
-export const register = async (req: Request, res: Response): Promise<void> => {
-    const { name, email, username, password, role, position, department_id } = req.body;
-
-    try {
-        // Verificar si el email y el username ya está registrado
-        const existingUser = await User.findOne({ email });
-        const existingUsername = await User.findOne({ username });
-
-        if (existingUser) {
-            res.status(StatusCodes.CONFLICT).json({ message: 'Email already in use' });
-            return;
-        }
-
-        if (existingUsername) {
-            res.status(StatusCodes.CONFLICT).json({ message: 'Username already in use' });
-            return;
-        }
-
-        // Encriptar la contraseña
-        const securityService = new SecurityService();
-        const hashedPassword = await securityService.hash(password);
-
-        // Crear el nuevo usuario
-        const newUser = new User({
-            name,
-            email,
-            username,
-            password: hashedPassword,
-            role,
-            position,
-            department_id
-        });
-
-        // Guardar el usuario en la base de datos
-        const savedUser = await newUser.save();
-        res.status(StatusCodes.CREATED).json({
-            message: 'User registered successfully',
-            user: savedUser
-        });
-    } catch (error) {
-        console.error('Error registering user:', error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
 };
