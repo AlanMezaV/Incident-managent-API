@@ -25,25 +25,25 @@ const validateSpecs = (type: string, specs: any): boolean => {
         }
 
         case 'LAPTOP': {
-            const { os, storage, cpu, ram, ramType } = specs as ILaptop;
+            const { os, storage, cpu, ram } = specs as ILaptop;
 
-            if (!os || !cpu || !ram || !storage || !ramType) {
+            if (!os || !cpu || !ram || !storage) {
                 return false;
             }
             break;
         }
 
         case 'PRINTER': {
-            const { printerType, printerInk, scanner } = specs as IPrinter;
-            if (!printerType || !printerInk || !scanner) {
+            const { printerType, scanner } = specs as IPrinter;
+            if (!printerType || !scanner) {
                 return false;
             }
             break;
         }
 
         case 'SWITCH': {
-            const { ports, macAddress } = specs as ISwitch;
-            if (!ports || !macAddress) {
+            const { ports } = specs as ISwitch;
+            if (!ports) {
                 return false;
             }
             break;
@@ -74,8 +74,8 @@ const validateSpecs = (type: string, specs: any): boolean => {
         }
 
         case 'PROJECTOR': {
-            const { resolution, connectivity } = specs as IProjector;
-            if (!resolution || !connectivity) {
+            const { brightness } = specs as IProjector;
+            if (!brightness) {
                 return false;
             }
             break;
