@@ -40,11 +40,10 @@ export class LocationService {
 
     //Obtener locations con dispositivos
     async getLocationsWithDevices(query: LocationSearchParamsDTO) {
-        const { building_id, department_id } = query;
+        const { building_id } = query;
 
         const locations = await Location.find({
-            building_id: building_id,
-            department_id: department_id
+            building_id: building_id
         });
 
         const data = await Promise.all(
