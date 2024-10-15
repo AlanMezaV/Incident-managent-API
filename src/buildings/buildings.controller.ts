@@ -1,228 +1,142 @@
-// import mongoose from 'mongoose';
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import Building from './building.model';
-import Location from '../locations/location.model';
-import Device from '../devices/device.model';
-import User from '../users/user.model';
+import { BuildingService } from './buildings.service';
+import {
+    CreateBuildingDTO,
+    UpdateBuildingDTO,
+    AddDepartmentToBuildingDTO,
+    BuildingSearchParamsDTO
+} from './dto/building.dto';
 
-// Get all buildings
-export const getBuildings = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const buildings = await Building.find();
-        res.status(StatusCodes.OK).json(buildings);
-    } catch (error) {
-        console.error('Error getting buildings:', error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
+export class BuildingController {
+    private buildingService: BuildingService;
+
+    constructor() {
+        this.buildingService = new BuildingService();
     }
-};
 
-// Get a building by id
-export const getBuildingById = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const { id } = req.params;
-        const building = await Building.findById(id);
-        if (building) {
-            res.status(StatusCodes.OK).json(building);
-        } else {
-            res.status(StatusCodes.NOT_FOUND).json({ message: 'Building not found' });
-        }
-    } catch (error) {
-        console.error('Error getting building:', error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
-    }
-};
-
-// Create a building
-export const createBuilding = async (req: Request, res: Response) => {
-    const { name, description, isShared, department_id, build_manager } = req.body;
-
-    try {
-        const building = new Building({
-            name,
-            description,
-            isShared,
-            department_id: [],
-            build_manager
-        });
-
-        if (isShared && Array.isArray(department_id)) {
-            building.department_id = department_id;
-        } else if (department_id) {
-            building.department_id = [department_id];
-        }
-
-        const newBuilding = await building.save();
-
-        res.status(StatusCodes.CREATED).json({
-            message: 'Building added successfully',
-            newBuilding
-        });
-    } catch (error) {
-        console.error('Error creating building:', error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
-    }
-};
-
-// Update a building by id
-export const updateBuilding = async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { name, description, isShared, department_id, build_manager } = req.body;
-
-    try {
-        const building = await Building.findById(id);
-
-        if (!building) {
-            return res.status(StatusCodes.NOT_FOUND).json({ message: 'Building not found' });
-        }
-
-        building.name = name || building.name;
-        building.description = description || building.description;
-        building.isShared = isShared ?? building.isShared;
-        building.build_manager = build_manager || building.build_manager;
-
-        if (isShared && Array.isArray(department_id)) {
-            building.department_id = department_id;
-        } else if (department_id) {
-            building.department_id = [department_id];
-        }
-
-        const updatedBuilding = await building.save();
-
-        return res.status(StatusCodes.OK).json({
-            message: 'Building updated successfully',
-            updatedBuilding
-        });
-    } catch (error) {
-        console.error('Error updating building:', error);
-        return res
-            .status(StatusCodes.INTERNAL_SERVER_ERROR)
-            .json({ message: 'Internal server error' });
-    }
-};
-
-// Delete a building by id and associated locations
-export const deleteBuilding = async (req: Request, res: Response) => {
-    const { id } = req.params;
-
-    try {
-        // Primero, eliminamos todas las ubicaciones asociadas al edificio
-        await Location.deleteMany({ building_id: id });
-
-        // Luego, eliminamos el edificio
-        const deletedBuilding = await Building.findByIdAndDelete(id);
-        if (deletedBuilding) {
-            return res.status(StatusCodes.OK).json({
-                message: 'Building and associated locations deleted successfully',
-                deletedBuilding
-            });
-        } else {
-            return res.status(StatusCodes.NOT_FOUND).json({ message: 'Building not found' });
-        }
-    } catch (error) {
-        console.error('Error deleting building:', error);
-        return res
-            .status(StatusCodes.INTERNAL_SERVER_ERROR)
-            .json({ message: 'Internal server error' });
-    }
-};
-export const searchBuildings = async (req: Request, res: Response) => {
-    const userId = req.body.user.userId;
-    const { name, description, isShared, departmentId, build_manager } = req.query;
-
-    try {
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' });
-        }
-        const userDepartmentId = user.department_id;
-
-        const filter: any = {};
-
-        if (name) {
-            filter.name = { $regex: name, $options: 'i' };
-        }
-
-        if (description) {
-            filter.description = { $regex: description, $options: 'i' };
-        }
-
-        if (isShared !== undefined) {
-            const isSharedBoolean = isShared === 'true';
-            filter.isShared = isSharedBoolean;
-
-            if (isSharedBoolean) {
-                filter.department_id = { $nin: [userDepartmentId] };
+    //Obtener building por id
+    getBuildingById = async (req: Request, res: Response) => {
+        try {
+            const building = await this.buildingService.getBuildingById(req.params.id);
+            if (building) {
+                res.status(StatusCodes.OK).json(building);
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json({ message: 'Building not found' });
             }
+        } catch (error) {
+            console.error('Error getting building:', error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: 'Internal server error'
+            });
         }
+    };
 
-        if (departmentId) {
-            filter.department_id = departmentId;
+    //Crear building
+    createBuilding = async (req: Request, res: Response) => {
+        const buildingData: CreateBuildingDTO = req.body;
+        try {
+            const newBuilding = await this.buildingService.createBuilding(buildingData);
+            res.status(StatusCodes.CREATED).json({
+                message: 'Building created successfully',
+                newBuilding
+            });
+        } catch (error) {
+            console.error('Error creating building:', error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: 'Internal server error'
+            });
         }
+    };
 
-        if (build_manager) {
-            filter.build_manager = build_manager;
-        }
-
-        const buildings = await Building.find(filter).populate('build_manager');
-
-        if (buildings.length === 0) {
-            return res.status(StatusCodes.NOT_FOUND).json({ message: 'No buildings found' });
-        }
-
-        const buildingsWithDevices = await Promise.all(
-            buildings.map(async building => {
-                const locations = await Location.find({
-                    building_id: building._id,
-                    department_id: departmentId
+    //Actualizar building
+    updateBuilding = async (req: Request, res: Response) => {
+        const buildingId = req.params.id;
+        const buildingData: UpdateBuildingDTO = req.body;
+        try {
+            const updatedBuilding = await this.buildingService.updateBuilding(
+                buildingId,
+                buildingData
+            );
+            if (updatedBuilding) {
+                res.status(StatusCodes.OK).json({
+                    message: 'Building updated successfully',
+                    updatedBuilding
                 });
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json({ message: 'Building not found' });
+            }
+        } catch (error) {
+            console.error('Error updating building:', error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: 'Internal server error'
+            });
+        }
+    };
 
-                const totalDevices = await Device.countDocuments({
-                    location_id: { $in: locations.map(loc => loc._id) }
+    //Eliminar building
+    deleteBuilding = async (req: Request, res: Response) => {
+        try {
+            const deletedBuilding = await this.buildingService.deleteBuilding(req.params.id);
+            if (deletedBuilding) {
+                res.status(StatusCodes.OK).json({
+                    message: 'Building deleted successfully',
+                    deletedBuilding
                 });
-                return {
-                    ...building.toObject(),
-                    totalDevices
-                };
-            })
-        );
-
-        return res.status(StatusCodes.OK).json(buildingsWithDevices);
-    } catch (error) {
-        console.error('Error searching buildings:', error);
-        return res
-            .status(StatusCodes.INTERNAL_SERVER_ERROR)
-            .json({ message: 'Internal server error' });
-    }
-};
-
-export const addDepartmentToBuilding = async (req: Request, res: Response): Promise<Response> => {
-    const { id } = req.params;
-    const { departmentId } = req.body;
-
-    try {
-        const building = await Building.findById(id);
-
-        if (!building) {
-            return res.status(StatusCodes.NOT_FOUND).json({ message: 'Building not found' });
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json({ message: 'Building not found' });
+            }
+        } catch (error) {
+            console.error('Error deleting building:', error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: 'Internal server error'
+            });
         }
+    };
 
-        if (!building.isShared) {
-            return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Building is not shared' });
+    //Añadir departamento a un edificio
+    addDepartmentToBuilding = async (req: Request, res: Response) => {
+        const buildingId = req.params.id;
+        const data: AddDepartmentToBuildingDTO = req.body;
+        try {
+            const updatedBuilding = await this.buildingService.addDepartmentToBuilding(
+                buildingId,
+                data
+            );
+            if (updatedBuilding) {
+                res.status(StatusCodes.OK).json({
+                    message: 'Department added to building successfully',
+                    updatedBuilding
+                });
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json({ message: 'Building not found' });
+            }
+        } catch (error) {
+            console.error('Error adding department to building:', error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: 'Internal server error'
+            });
         }
+    };
 
-        building.department_id.push(departmentId);
-
-        const updatedBuilding = await building.save();
-
-        return res.status(StatusCodes.OK).json({
-            message: 'Department added to building successfully',
-            updatedBuilding
-        });
-    } catch (error) {
-        console.error('Error adding department to building:', error);
-        return res
-            .status(StatusCodes.INTERNAL_SERVER_ERROR)
-            .json({ message: 'Internal server error' });
-    }
-};
+    //Obtener buildings por criterios de busqueda
+    searchBuildings = async (req: Request, res: Response) => {
+        const query: BuildingSearchParamsDTO = req.query;
+        try {
+            const buildings = await this.buildingService.searchBuildings(
+                req.body.user.userId,
+                query
+            );
+            if (buildings) {
+                res.status(StatusCodes.OK).json(buildings);
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json({ message: 'Buildings not found' });
+            }
+        } catch (error) {
+            console.error('Error searching buildings:', error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: 'Internal server error'
+            });
+        }
+    };
+}

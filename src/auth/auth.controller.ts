@@ -3,7 +3,7 @@ import { createToken } from '../utils/jwtUtils';
 import { StatusCodes } from 'http-status-codes';
 import { verifyTokenJWT } from '../utils/jwtUtils';
 import { SecurityService } from '../utils/security';
-import User from '../users/user.model';
+import { User } from '../users/schema/user.schema';
 import cloudinary from '../utils/cloudinaryConfig';
 
 export const register = async (req: Request, res: Response): Promise<void> => {

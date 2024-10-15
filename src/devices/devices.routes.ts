@@ -1,27 +1,19 @@
 import Router from 'express';
-import {
-    getDevices,
-    getDeviceById,
-    createDevice,
-    updateDevice,
-    deleteDevice,
-    searchDevices,
-    getDevicesByDepartmentId,
-    getDevicesByDepartmentSearch,
-    getNumberDevicesByDepartmentId
-} from './devices.controller';
+import { DeviceController } from './devices.controller';
 import { authMiddleware } from '../auth/auth.middleware';
 
 const router = Router();
+const deviceController = new DeviceController();
 
-router.get('/devices', authMiddleware, getDevices);
-router.get('/devices/:id', getDeviceById);
-router.post('/devices', createDevice);
-router.put('/devices/:id', updateDevice);
-router.delete('/devices/:id', authMiddleware, deleteDevice);
-router.get('/devices-search', searchDevices);
-router.get('/devices-by-department/:department_id', getDevicesByDepartmentId);
-router.get('/devices-by-department-search', getDevicesByDepartmentSearch);
-router.get('/number-devices-by-department/:department_id', getNumberDevicesByDepartmentId);
+router.get('/devices/:id', deviceController.getDeviceById);
+router.post('/devices', authMiddleware, deviceController.createDevice);
+router.put('/devices/:id', authMiddleware, deviceController.updateDevice);
+router.delete('/devices/:id', authMiddleware, deviceController.deleteDevice);
+router.get('/devices-search', deviceController.searchDevices);
+router.get('/devices-by-department-search', deviceController.searchDevicesByDepartment);
+router.get(
+    '/number-devices-by-department/:department_id',
+    deviceController.getNumberDevicesByDepartment
+);
 
 export default router;

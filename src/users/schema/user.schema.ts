@@ -1,16 +1,5 @@
-// user.model.ts
-import mongoose, { Document, Schema, Model, Types } from 'mongoose';
-
-interface IUser extends Document {
-    name: string;
-    username: string;
-    email: string;
-    password: string;
-    role: string;
-    position: string;
-    department_id: Types.ObjectId;
-    imageUrl?: string;
-}
+import { Schema, model } from 'mongoose';
+import { IUser } from '../interface/user.interface';
 
 const userSchema = new Schema<IUser>(
     {
@@ -26,6 +15,4 @@ const userSchema = new Schema<IUser>(
     { timestamps: { createdAt: 'created_at' } }
 );
 
-const User: Model<IUser> = mongoose.model<IUser>('User', userSchema);
-
-export default User;
+export const User = model<IUser>('User', userSchema);

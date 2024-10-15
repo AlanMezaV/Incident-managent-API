@@ -1,13 +1,5 @@
-import mongoose, { Document, Schema, Model, Types } from 'mongoose';
-
-interface ILocation extends Document {
-    name: string;
-    type: string;
-    description: string;
-    building_id: Types.ObjectId;
-    department_id: Types.ObjectId;
-    location_manager: Types.ObjectId;
-}
+import { Schema, model } from 'mongoose';
+import { ILocation } from '../interface/location.interface';
 
 const locationSchema = new Schema<ILocation>(
     {
@@ -21,6 +13,4 @@ const locationSchema = new Schema<ILocation>(
     { timestamps: { createdAt: 'created_at' } }
 );
 
-const Location: Model<ILocation> = mongoose.model<ILocation>('Location', locationSchema);
-
-export default Location;
+export const Location = model<ILocation>('Location', locationSchema);

@@ -1,23 +1,18 @@
 import { Router } from 'express';
-import {
-    getUsers,
-    getUserById,
-    updateUser,
-    deleteUser,
-    getUserInfo,
-    usersSearch,
-    userDepartmentOptions
-} from './users.controller';
+import { UserController } from './users.controller';
 import { authMiddleware } from '../auth/auth.middleware';
 
 const router = Router();
+const userController = new UserController();
 
-router.get('/users', authMiddleware, getUsers);
-router.get('/users/:id', authMiddleware, getUserById);
-router.put('/users/:id', authMiddleware, updateUser);
-router.delete('/users/:id', authMiddleware, deleteUser);
-router.get('/info', authMiddleware, getUserInfo);
-router.get('/users-search', authMiddleware, usersSearch);
-router.get('/users-options-department/:department_id', authMiddleware, userDepartmentOptions);
+router.put('/users/:id', authMiddleware, userController.updateUser);
+router.delete('/users/:id', authMiddleware, userController.deleteUser);
+router.get('/info', authMiddleware, userController.userInfo);
+router.get('/users-search', authMiddleware, userController.usersSearch);
+router.get(
+    '/users-options-department/:department_id',
+    authMiddleware,
+    userController.userDepartmentOptions
+);
 
 export default router;
