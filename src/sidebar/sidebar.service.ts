@@ -13,4 +13,12 @@ export class SidebarService {
     async getRoutesByRole(role: string) {
         return Sidebar.find({ roles: role }).exec();
     }
+
+    async getAllSidebarOptions(): Promise<CreateSidebarOptionsDto[]> {
+        return await Sidebar.find().exec();
+    }
+
+    async updateSidebarOption(route: string, updateData: CreateSidebarOptionsDto): Promise<void> {
+        await Sidebar.updateOne({ route }, updateData).exec();
+    }
 }

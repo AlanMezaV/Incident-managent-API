@@ -45,5 +45,27 @@ export async function initializeSidebarOptions(sidebarService: SidebarService) {
             await sidebarService.createSidebarOptions(route);
         }
         console.log('Sidebar options inserted');
+    } else {
+        const existingSidebarOptions = await sidebarService.getAllSidebarOptions();
+
+        for (const initialOption of initialSidebarOptions) {
+            const existingOption = existingSidebarOptions.find(
+                option => option.route === initialOption.route
+            );
+
+            if (existingOption) {
+                if (
+                    existingOption.name !== initialOption.name ||
+                    existingOption.icon !== initialOption.icon ||
+                    JSON.stringify(existingOption.roles) !== JSON.stringify(initialOption.roles)
+                ) {
+                    await sidebarService.updateSidebarOption(initialOption.route, initialOption);
+                    console.log(`Updated sidebar option: ${initialOption.route}`);
+                }
+            } else {
+                await sidebarService.createSidebarOptions(initialOption);
+                console.log(`Inserted new sidebar option: ${initialOption.route}`);
+            }
+        }
     }
 }
