@@ -6,7 +6,7 @@ const router = Router();
 const buildingController = new BuildingController();
 
 router.get('/buildings/:id', authMiddleware, buildingController.getBuildingById);
-router.post('/buildings', buildingController.createBuilding);
+router.post('/buildings', authMiddleware, buildingController.createBuilding);
 router.put('/buildings/:id', authMiddleware, buildingController.updateBuilding);
 router.delete('/buildings/:id', authMiddleware, buildingController.deleteBuilding);
 router.get('/buildings-search', authMiddleware, buildingController.searchBuildings);

@@ -10,6 +10,8 @@ import AuthRoutes from './auth/auth.routes';
 import LocationRoutes from './locations/locations.routes';
 import DeviceRoutes from './devices/devices.routes';
 import SidebarRoutes from './sidebar/sidebar.routes';
+import PeriodsRoutes from './periods/periods.routes';
+import IncidentsRoutes from './incidents/incidents.routes';
 
 const app = express();
 
@@ -31,6 +33,8 @@ app.use('/', LocationRoutes);
 app.use('/', AuthRoutes);
 app.use('/', DeviceRoutes);
 app.use('/', SidebarRoutes);
+app.use('/', PeriodsRoutes);
+app.use('/', IncidentsRoutes);
 
 // Error handling
 app.use((req, res, next) => {

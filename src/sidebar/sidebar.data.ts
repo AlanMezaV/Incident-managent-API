@@ -1,37 +1,56 @@
+import mongoose from 'mongoose';
+import { roles } from '../utils/constants/user';
 import { SidebarService } from './sidebar.service';
 import { CreateSidebarOptionsDto } from './dto/sidebar.dto';
-import mongoose from 'mongoose';
 
 const initialSidebarOptions: CreateSidebarOptionsDto[] = [
     {
         route: '/home',
         name: 'Inicio',
         icon: 'House',
-        roles: ['ADMIN_DEPARTMENT', 'ADMIN_TECHNICIANS', 'TECHNICIAN', 'ADMIN_LAB', 'ONLY_READ']
+        roles: [
+            roles.ADMIN_DEPARTMENT,
+            roles.ADMIN_TECHNICIANS,
+            roles.TECHNICIAN,
+            roles.ADMIN_LAB,
+            roles.ONLY_READ
+        ]
     },
     {
         route: '/user',
         name: 'Usuarios',
         icon: 'Users',
-        roles: ['ADMIN_DEPARTMENT', 'ADMIN_TECHNICIANS']
+        roles: [roles.ADMIN_DEPARTMENT, roles.ADMIN_TECHNICIANS, roles.TECHNICIAN, roles.ADMIN_LAB]
     },
     {
         route: '/build',
         name: 'Edificios',
         icon: 'Building2',
-        roles: ['ADMIN_DEPARTMENT', 'ADMIN_TECHNICIANS', 'TECHNICIAN', 'ADMIN_LAB', 'ONLY_READ']
+        roles: [
+            roles.ADMIN_DEPARTMENT,
+            roles.ADMIN_TECHNICIANS,
+            roles.TECHNICIAN,
+            roles.ADMIN_LAB,
+            roles.ONLY_READ
+        ]
     },
     {
         route: '/device',
         name: 'Equipos',
         icon: 'Laptop',
-        roles: ['ADMIN_DEPARTMENT', 'ADMIN_TECHNICIANS', 'TECHNICIAN', 'ADMIN_LAB', 'ONLY_READ']
+        roles: [
+            roles.ADMIN_DEPARTMENT,
+            roles.ADMIN_TECHNICIANS,
+            roles.TECHNICIAN,
+            roles.ADMIN_LAB,
+            roles.ONLY_READ
+        ]
     },
     {
         route: '/incident',
         name: 'Incidencias',
         icon: 'CircleX',
-        roles: ['ADMIN_DEPARTMENT', 'ADMIN_TECHNICIANS', 'TECHNICIAN', 'ADMIN_LAB']
+        roles: [roles.ADMIN_DEPARTMENT, roles.ADMIN_TECHNICIANS, roles.TECHNICIAN, roles.ADMIN_LAB]
     }
 ];
 
