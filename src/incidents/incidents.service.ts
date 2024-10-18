@@ -20,6 +20,12 @@ export class IncidentService {
         return await Incident.findById(incidentId);
     }
 
+    async getNewFolio() {
+        const lastIncident = await Incident.findOne().sort({ folio: -1 }).exec();
+        const lastFolio = lastIncident ? lastIncident.folio : 0;
+        return lastFolio + 1;
+    }
+
     //Crear Incident
     async createIncident(incidentData: CreateIncidentDto) {
         const session = await mongoose.startSession();

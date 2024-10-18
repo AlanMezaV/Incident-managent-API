@@ -40,6 +40,18 @@ export class IncidentController {
         }
     };
 
+    getNewFolio = async (req: Request, res: Response) => {
+        try {
+            const newFolio = await this.incidentService.getNewFolio();
+            res.status(StatusCodes.OK).json({ folio: newFolio });
+        } catch (error) {
+            console.error('Error getting new folio:', error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: 'Internal server error'
+            });
+        }
+    };
+
     //Crear Incident
     createIncident = async (req: Request, res: Response) => {
         const incidentData: CreateIncidentDto = req.body;

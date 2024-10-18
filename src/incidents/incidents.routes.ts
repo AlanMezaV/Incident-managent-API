@@ -7,6 +7,7 @@ const incidentController = new IncidentController();
 
 router.get('/incidents', authMiddleware, incidentController.getIncidents);
 router.get('/incidents/:id', authMiddleware, incidentController.getIncidentById);
+router.get('/incidents-folio', authMiddleware, incidentController.getNewFolio);
 router.post('/incidents', authMiddleware, incidentController.createIncident);
 router.put('/incidents/:id', authMiddleware, incidentController.updateIncident);
 router.delete('/incidents/:id', authMiddleware, incidentController.deleteIncident);
