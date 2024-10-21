@@ -64,7 +64,8 @@ export class IncidentController {
         } catch (error) {
             console.error('Error creating incident:', error);
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                message: 'Internal server error'
+                message: 'Internal server error',
+                error
             });
         }
     };

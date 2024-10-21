@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import { Incident } from './schema/incident.schema';
 import { PeriodService } from '../periods/periods.service';
 import { CreateIncidentDto, UpdateIncidentDto, SearchIncidentDto } from './dto/incident.dto';
@@ -28,33 +27,18 @@ export class IncidentService {
 
     //Crear Incident
     async createIncident(incidentData: CreateIncidentDto) {
-        const session = await mongoose.startSession();
-        session.startTransaction();
+        const lastIncident = await Incident.findOne().sort({ folio: -1 }).exec();
+        const lastFolio = lastIncident ? lastIncident.folio : 0;
+        const newFolio = lastFolio + 1;
+        const period = await this.periodService.getLastPeriod();
 
-        try {
-            const lastIncident = await Incident.findOne()
-                .sort({ folio: -1 })
-                .session(session)
-                .exec();
-            const lastFolio = lastIncident ? lastIncident.folio : 0;
-            const newFolio = lastFolio + 1;
-            const period = await this.periodService.getLastPeriod();
+        const newIncident = new Incident({
+            ...incidentData,
+            folio: newFolio,
+            period: period
+        });
 
-            const newIncident = new Incident({
-                ...incidentData,
-                folio: newFolio,
-                period: period
-            });
-
-            await newIncident.save({ session });
-            await session.commitTransaction();
-            session.endSession();
-            return newIncident;
-        } catch (error) {
-            await session.abortTransaction();
-            session.endSession();
-            throw new Error('Error al crear la incidencia');
-        }
+        return await newIncident.save();
     }
 
     // Actualizar Incident
