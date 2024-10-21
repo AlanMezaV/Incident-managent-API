@@ -123,3 +123,32 @@ export const verifyToken = async (req: Request, res: Response): Promise<void> =>
         });
     }
 };
+
+export const updatePhoto = async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params;
+
+    try {
+        const user = await User.findById(id);
+
+        if (!user) {
+            res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' });
+            return;
+        }
+
+        // Subir la imagen a Cloudinary
+        let imageUrl: string | undefined;
+        if (req.file) {
+            const result = await cloudinary.uploader.upload(req.file.path);
+            imageUrl = result.secure_url; // URL de la imagen subida
+        }
+
+        if (imageUrl) {
+            user.imageUrl = imageUrl;
+        }
+        await user.save();
+        res.status(StatusCodes.OK).json({ message: 'Photo updated successfully' });
+    } catch (error) {
+        console.error('Error updating photo:', error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
+    }
+};

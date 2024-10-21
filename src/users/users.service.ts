@@ -23,7 +23,7 @@ export class UserService {
 
     // Obtener información de usuario
     async getUserInfo(userId: string) {
-        return await User.findById(userId).select('-password');
+        return await User.findById(userId).select('-password').populate('department_id');
     }
 
     // Buscar usuarios con criterios
