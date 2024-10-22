@@ -152,3 +152,34 @@ export const updatePhoto = async (req: Request, res: Response): Promise<void> =>
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
 };
+
+export const updatePassword = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { oldPassword, newPassword } = req.body;
+
+    try {
+        const user = await User.findById(id).select('+password');
+
+        if (!user) {
+            res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' });
+            return;
+        }
+
+        const securityService = new SecurityService();
+        const isMatch = await securityService.compare(oldPassword, user.password);
+
+        if (!isMatch) {
+            res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Invalid password' });
+            return;
+        }
+
+        user.password = await securityService.hash(newPassword);
+        await user.save();
+        return res.status(StatusCodes.OK).json({ message: 'Password updated successfully' });
+    } catch (error) {
+        console.error('Error updating password:', error);
+        return res
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .json({ message: 'Internal server error' });
+    }
+};

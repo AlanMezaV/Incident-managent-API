@@ -1,6 +1,13 @@
 // auth.routes.ts
 import { Router } from 'express';
-import { login, logout, register, verifyToken, updatePhoto } from './auth.controller';
+import {
+    login,
+    logout,
+    register,
+    verifyToken,
+    updatePhoto,
+    updatePassword
+} from './auth.controller';
 import { authMiddleware } from './auth.middleware';
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
@@ -22,5 +29,6 @@ router.post('/logout', authMiddleware, logout);
 router.post('/register', upload.single('imagen'), register);
 router.put('/update-photo/:id', authMiddleware, upload.single('imagen'), updatePhoto);
 router.post('/verify', verifyToken);
+router.put('/update-password/:id', authMiddleware, updatePassword);
 
 export default router;
