@@ -20,7 +20,7 @@ const initialSidebarOptions: CreateSidebarOptionsDto[] = [
         route: '/user',
         name: 'Usuarios',
         icon: 'Users',
-        roles: [roles.ADMIN_DEPARTMENT, roles.ADMIN_TECHNICIANS, roles.TECHNICIAN, roles.ADMIN_LAB]
+        roles: [roles.ADMIN_DEPARTMENT, roles.ADMIN_TECHNICIANS, roles.ADMIN_LAB]
     },
     {
         route: '/build',

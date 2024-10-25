@@ -4,6 +4,11 @@ import { CreateDeviceDTO, UpdateDeviceDTO, DeviceSearchParamsDTO } from './dto/d
 import { validateSpecs } from '../utils/validations/devicesValidations';
 
 export class DeviceService {
+    //Obtener dispositivos
+    async getDevices() {
+        return await Device.find().populate('location_id');
+    }
+
     //Obtener dispositivo por id
     async getDeviceById(deviceId: string) {
         return await Device.findById(deviceId).populate('location_id');
@@ -69,13 +74,16 @@ export class DeviceService {
     //Obtener dispositivos por departamento con criterios de busqueda
     async searchDevicesByDepartment(query: DeviceSearchParamsDTO) {
         const { department_id, building_id } = query;
-        const locations = await Location.find({ department_id });
+        let locations = await Location.find();
+        let filteredLocations = await Location.find({ department_id });
 
         if (!locations || locations.length === 0) {
             throw new Error('Locations not found');
         }
 
-        let filteredLocations = locations;
+        if (!department_id) {
+            filteredLocations = locations;
+        }
 
         if (building_id && building_id !== 'ALL') {
             filteredLocations = locations.filter(location =>
@@ -101,5 +109,10 @@ export class DeviceService {
         return await Device.find({ location_id: { $in: locationIds } })
             .populate('location_id')
             .countDocuments();
+    }
+
+    //Obtener numero de dispositivos
+    async getNumberDevices() {
+        return await Device.countDocuments();
     }
 }

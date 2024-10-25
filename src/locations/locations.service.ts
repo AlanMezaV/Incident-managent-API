@@ -44,7 +44,7 @@ export class LocationService {
 
         const locations = await Location.find({
             building_id: building_id
-        });
+        }).populate('location_manager');
 
         const data = await Promise.all(
             locations.map(async location => {

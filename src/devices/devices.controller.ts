@@ -10,6 +10,19 @@ export class DeviceController {
         this.deviceService = new DeviceService();
     }
 
+    //Obtener dispositivos
+    getDevices = async (req: Request, res: Response) => {
+        try {
+            const devices = await this.deviceService.getDevices();
+            res.status(StatusCodes.OK).json(devices);
+        } catch (error) {
+            console.error('Error getting devices:', error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: 'Internal server error'
+            });
+        }
+    };
+
     //Obtener dispositivo por id
     getDeviceById = async (req: Request, res: Response) => {
         try {
@@ -124,6 +137,19 @@ export class DeviceController {
             res.status(StatusCodes.OK).json({ totalDevices });
         } catch (error) {
             console.error('Error getting number of devices by department:', error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: 'Internal server error'
+            });
+        }
+    };
+
+    //Obtener numero de dispositivos
+    getNumberDevices = async (req: Request, res: Response) => {
+        try {
+            const totalDevices = await this.deviceService.getNumberDevices();
+            res.status(StatusCodes.OK).json({ totalDevices });
+        } catch (error) {
+            console.error('Error getting number of devices:', error);
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                 message: 'Internal server error'
             });

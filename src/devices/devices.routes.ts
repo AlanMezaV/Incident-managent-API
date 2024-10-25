@@ -5,6 +5,7 @@ import { authMiddleware } from '../auth/auth.middleware';
 const router = Router();
 const deviceController = new DeviceController();
 
+router.get('/devices', authMiddleware, deviceController.getDevices);
 router.get('/devices/:id', authMiddleware, deviceController.getDeviceById);
 router.post('/devices', authMiddleware, deviceController.createDevice);
 router.put('/devices/:id', authMiddleware, deviceController.updateDevice);
@@ -20,5 +21,6 @@ router.get(
     authMiddleware,
     deviceController.getNumberDevicesByDepartment
 );
+router.get('/number-devices', authMiddleware, deviceController.getNumberDevices);
 
 export default router;

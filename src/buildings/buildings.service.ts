@@ -10,6 +10,31 @@ import {
 } from './dto/building.dto';
 
 export class BuildingService {
+    //Obtener Buildings
+    async getBuildings() {
+        const buildings = await Building.find().populate('departments.build_manager');
+
+        if (!buildings) {
+            return null;
+        }
+
+        return await Promise.all(
+            buildings.map(async (building: { _id: any; toObject: () => any }) => {
+                const locations = await Location.find({
+                    building_id: building._id
+                });
+
+                const totalDevices = await Device.countDocuments({
+                    location_id: { $in: locations.map(loc => loc._id) }
+                });
+                return {
+                    ...building.toObject(),
+                    totalDevices
+                };
+            })
+        );
+    }
+
     //Obtener Building por id
     async getBuildingById(buildingId: string) {
         return await Building.findById(buildingId);
@@ -82,7 +107,7 @@ export class BuildingService {
             return null;
         }
         const userDepartmentId = user.department_id;
-        console.log('userDepartmentId', userDepartmentId);
+
         if (name) filter.name = { $regex: name, $options: 'i' };
         if (description) filter.description = { $regex: description, $options: 'i' };
 

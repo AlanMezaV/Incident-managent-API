@@ -15,6 +15,19 @@ export class BuildingController {
         this.buildingService = new BuildingService();
     }
 
+    //Obtener buildings
+    getBuildings = async (req: Request, res: Response) => {
+        try {
+            const buildings = await this.buildingService.getBuildings();
+            res.status(StatusCodes.OK).json(buildings);
+        } catch (error) {
+            console.error('Error getting buildings:', error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: 'Internal server error'
+            });
+        }
+    };
+
     //Obtener building por id
     getBuildingById = async (req: Request, res: Response) => {
         try {

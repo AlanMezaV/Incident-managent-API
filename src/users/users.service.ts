@@ -34,10 +34,12 @@ export class UserService {
         if (name) filter.name = { $regex: name, $options: 'i' };
         if (username) filter.username = { $regex: username, $options: 'i' };
         if (email) filter.email = { $regex: email, $options: 'i' };
-        if (position && position !== 'ALL') filter.position = { $regex: position, $options: 'i' };
+        if (position && position !== 'ALL') {
+            filter.position = { $regex: position, $options: 'i' };
+        }
         if (department_id) {
             filter.department_id = new Types.ObjectId(department_id);
-            filter.role = { $ne: 'ADMIN_DEPARTMENT' };
+            filter.role = { $nin: ['ADMIN_DEPARTMENT', 'ADMIN_TECHNICIANS'] };
         }
 
         return await User.find(filter).select('-password');

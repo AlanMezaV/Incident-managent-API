@@ -5,6 +5,7 @@ import { authMiddleware } from '../auth/auth.middleware';
 const router = Router();
 const buildingController = new BuildingController();
 
+router.get('/buildings', authMiddleware, buildingController.getBuildings);
 router.get('/buildings/:id', authMiddleware, buildingController.getBuildingById);
 router.post('/buildings', authMiddleware, buildingController.createBuilding);
 router.put('/buildings/:id', authMiddleware, buildingController.updateBuilding);
