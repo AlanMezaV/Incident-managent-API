@@ -14,9 +14,17 @@ export class IncidentService {
         return await Incident.find();
     }
 
-    //Obtener Incident por id
+    //Obtener Incident por Id
     async getIncidentById(incidentId: string) {
-        return await Incident.findById(incidentId);
+        return await Incident.findById(incidentId).populate({
+            path: 'device_id',
+            populate: {
+                path: 'location_id',
+                populate: {
+                    path: 'building_id'
+                }
+            }
+        });
     }
 
     async getNewFolio() {
