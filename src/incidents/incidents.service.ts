@@ -54,9 +54,14 @@ export class IncidentService {
         const incident = await Incident.findById(incidentId);
 
         if (!incident) {
-            return null;
+            throw new Error('Incident not found');
         }
 
+        incident.folio = incident.folio;
+        incident.department_id = incident.department_id;
+        incident.date = incident.date;
+        incident.period = incident.period;
+        incident.device_id = incident.device_id;
         incident.start_date = data.start_date ?? incident.start_date;
         incident.end_date = data.end_date ?? incident.end_date;
         incident.time_duration = data.time_duration ?? incident.time_duration;

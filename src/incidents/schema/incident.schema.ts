@@ -4,7 +4,7 @@ import { IIncident } from '../interface/incident.interface';
 const incidentSchema = new Schema<IIncident>(
     {
         folio: { type: Number, required: true },
-        device_id: { type: Schema.Types.ObjectId, ref: 'Device', required: true },
+        device_id: { type: Schema.Types.ObjectId, ref: 'Device' },
         date: { type: Date, required: true },
         start_date: { type: Date },
         end_date: { type: Date },
