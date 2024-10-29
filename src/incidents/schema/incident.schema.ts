@@ -8,6 +8,7 @@ const incidentSchema = new Schema<IIncident>(
         date: { type: Date, required: true },
         start_date: { type: Date },
         end_date: { type: Date },
+        arrival_time: { type: String },
         time_duration: { type: String },
         status: { type: String, required: true },
         incident_type: { type: String, required: true },

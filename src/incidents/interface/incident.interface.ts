@@ -6,6 +6,7 @@ export interface IIncident {
     date: Date;
     start_date: Date;
     end_date: Date;
+    arrival_time: string;
     time_duration: string;
     status: string;
     incident_type: string;

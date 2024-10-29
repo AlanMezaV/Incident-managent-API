@@ -15,6 +15,7 @@ export class UpdateIncidentDto {
     start_date?: Date;
     end_date?: Date;
     time_duration?: string;
+    arrival_time?: string;
     status?: string;
     incident_type?: string;
     work?: string;

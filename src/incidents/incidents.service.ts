@@ -65,6 +65,7 @@ export class IncidentService {
         incident.start_date = data.start_date ?? incident.start_date;
         incident.end_date = data.end_date ?? incident.end_date;
         incident.time_duration = data.time_duration ?? incident.time_duration;
+        incident.arrival_time = data.arrival_time ?? incident.arrival_time;
         incident.status = data.status ?? incident.status;
         incident.incident_type = data.incident_type ?? incident.incident_type;
         incident.work = data.work ?? incident.work;
