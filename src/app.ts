@@ -12,6 +12,7 @@ import DeviceRoutes from './devices/devices.routes';
 import SidebarRoutes from './sidebar/sidebar.routes';
 import PeriodsRoutes from './periods/periods.routes';
 import IncidentsRoutes from './incidents/incidents.routes';
+import SparePartsRoutes from './spare_parts/spare_parts.routes';
 import ChangeRequestsRoutes from './change_requests/change_requests.routes';
 
 const app = express();
@@ -36,6 +37,7 @@ app.use('/', DeviceRoutes);
 app.use('/', SidebarRoutes);
 app.use('/', PeriodsRoutes);
 app.use('/', IncidentsRoutes);
+app.use('/', SparePartsRoutes);
 app.use('/', ChangeRequestsRoutes);
 
 // Error handling

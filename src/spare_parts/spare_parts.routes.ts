@@ -7,9 +7,9 @@ const router = Router();
 const sparePartController = new SparePartController();
 
 router.get('/spare-parts', authMiddleware, sparePartController.getAllSpareParts);
-router.get('/spare-part/:id', authMiddleware, sparePartController.getSparePartById);
-router.post('/spare-part', authMiddleware, sparePartController.createSparePart);
-router.put('/spare-part/:id', authMiddleware, sparePartController.updateSparePart);
-router.delete('/spare-part/:id', authMiddleware, sparePartController.deleteSparePart);
+router.get('/spare-parts/:id', authMiddleware, sparePartController.getSparePartById);
+router.post('/spare-parts', authMiddleware, sparePartController.createSparePart);
+router.put('/spare-parts/:id', authMiddleware, sparePartController.updateSparePart);
+router.delete('/spare-parts/:id', authMiddleware, sparePartController.deleteSparePart);
 
 export default router;
