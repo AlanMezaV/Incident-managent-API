@@ -47,10 +47,28 @@ const initialSidebarOptions: CreateSidebarOptionsDto[] = [
         ]
     },
     {
+        route: '/spare-parts',
+        name: 'Repuestos',
+        icon: 'Cpu',
+        roles: [roles.ADMIN_TECHNICIANS, roles.TECHNICIAN]
+    },
+    {
         route: '/incident',
         name: 'Incidencias',
-        icon: 'CircleX',
+        icon: 'Incidents',
         roles: [roles.ADMIN_DEPARTMENT, roles.ADMIN_TECHNICIANS, roles.TECHNICIAN, roles.ADMIN_LAB]
+    },
+    {
+        route: '/change',
+        name: 'Cambios',
+        icon: 'Changes',
+        roles: [roles.ADMIN_TECHNICIANS, roles.TECHNICIAN]
+    },
+    {
+        route: '/changes-history',
+        name: 'Historial',
+        icon: 'History',
+        roles: [roles.ADMIN_TECHNICIANS, roles.TECHNICIAN]
     }
 ];
 
