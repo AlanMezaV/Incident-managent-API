@@ -1,7 +1,11 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { SparePartsService } from './spare_parts.service';
-import { CreateSparePartsDto, UpdateSparePartsDto } from './dto/spare_parts.dto';
+import {
+    CreateSparePartsDto,
+    UpdateSparePartsDto,
+    SearchSparePartsDto
+} from './dto/spare_parts.dto';
 
 export class SparePartController {
     private sparePartService: SparePartsService;
@@ -97,6 +101,20 @@ export class SparePartController {
             }
         } catch (error) {
             console.error('Error deleting spare part:', error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: 'Internal server error'
+            });
+        }
+    };
+
+    // Buscar piezas por criterios de busqueda
+    searchSpareParts = async (req: Request, res: Response) => {
+        try {
+            const searchData: SearchSparePartsDto = req.query;
+            const spareParts = await this.sparePartService.searchSpareParts(searchData);
+            res.status(StatusCodes.OK).json(spareParts);
+        } catch (error) {
+            console.error('Error searching spare parts:', error);
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                 message: 'Internal server error'
             });

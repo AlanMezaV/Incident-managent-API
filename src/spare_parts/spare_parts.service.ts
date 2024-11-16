@@ -1,5 +1,9 @@
 import { SparePart } from './schema/spare_part.schema';
-import { CreateSparePartsDto, UpdateSparePartsDto } from './dto/spare_parts.dto';
+import {
+    CreateSparePartsDto,
+    UpdateSparePartsDto,
+    SearchSparePartsDto
+} from './dto/spare_parts.dto';
 
 export class SparePartsService {
     // Obtener todas las piezas de repuesto
@@ -39,5 +43,21 @@ export class SparePartsService {
     // Eliminar pieza de repuesto
     async deleteSparePart(sparePartId: string) {
         return await SparePart.findByIdAndDelete(sparePartId);
+    }
+
+    //Buscar piezas por criterios de busqueda
+    async searchSpareParts(searchData: SearchSparePartsDto) {
+        const { name, type, device_type, description, quantity, price } = searchData;
+
+        const filter: any = {};
+        if (name) filter.name = { $regex: name, $options: 'i' };
+        if (type) filter.type = { $regex: type, $options: 'i' };
+        if (device_type && device_type !== 'ALL')
+            filter.device_type = { $regex: device_type, $options: 'i' };
+        if (description) filter.description = { $regex: description, $options: 'i' };
+        if (quantity) filter.quantity = quantity;
+        if (price) filter.price = price;
+
+        return await SparePart.find(filter);
     }
 }

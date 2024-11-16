@@ -128,4 +128,21 @@ export class IncidentController {
             });
         }
     };
+
+    //Obtener información del dashboard
+    getDashboardStats = async (req: Request, res: Response) => {
+        const { department_id, technician_id } = req.query;
+        try {
+            const dashboardInfo = await this.incidentService.getDashboardStats(
+                department_id as string,
+                technician_id as string
+            );
+            res.status(StatusCodes.OK).json(dashboardInfo);
+        } catch (error) {
+            console.error('Error getting dashboard info:', error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: 'Internal server error'
+            });
+        }
+    };
 }

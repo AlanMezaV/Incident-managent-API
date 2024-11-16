@@ -11,5 +11,6 @@ router.get('/spare-parts/:id', authMiddleware, sparePartController.getSparePartB
 router.post('/spare-parts', authMiddleware, sparePartController.createSparePart);
 router.put('/spare-parts/:id', authMiddleware, sparePartController.updateSparePart);
 router.delete('/spare-parts/:id', authMiddleware, sparePartController.deleteSparePart);
+router.get('/spare-parts-search', authMiddleware, sparePartController.searchSpareParts);
 
 export default router;

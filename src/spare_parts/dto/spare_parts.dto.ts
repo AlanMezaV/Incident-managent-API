@@ -15,3 +15,12 @@ export class UpdateSparePartsDto {
     quantity?: number;
     price?: number;
 }
+
+export class SearchSparePartsDto {
+    name?: string;
+    type?: string;
+    device_type?: string;
+    description?: string;
+    quantity?: number;
+    price?: number;
+}

@@ -1,6 +1,7 @@
 import { Incident } from './schema/incident.schema';
 import { PeriodService } from '../periods/periods.service';
 import { CreateIncidentDto, UpdateIncidentDto, SearchIncidentDto } from './dto/incident.dto';
+import moment from 'moment';
 
 export class IncidentService {
     private periodService: PeriodService;
@@ -101,5 +102,91 @@ export class IncidentService {
         if (query.period) filter.period = query.period;
 
         return await Incident.find(filter);
+    }
+
+    async getDashboardStats(departmentId: string, technicianId: string) {
+        const filter: any = {};
+        if (departmentId) {
+            filter.department_id = departmentId;
+        }
+
+        if (technicianId) {
+            filter.technician_id = technicianId;
+        }
+
+        // Fecha actual y fecha del mes pasado usando moment
+        const currentMonthStart = moment().startOf('month').toDate();
+        const lastMonthStart = moment().subtract(1, 'months').startOf('month').toDate();
+        const lastMonthEnd = moment().subtract(1, 'months').endOf('month').toDate();
+
+        // Total de incidencias de este mes
+        const totalIncidents = await Incident.countDocuments({
+            ...filter,
+            date: { $gte: currentMonthStart }
+        });
+
+        // Total de incidencias del mes pasado
+        const incidentsLastMonth = await Incident.countDocuments({
+            ...filter,
+            date: { $gte: lastMonthStart, $lte: lastMonthEnd }
+        });
+
+        // Total de reparaciones de este mes
+        const totalRepairs = await Incident.countDocuments({
+            ...filter,
+            incident_type: 'REPAIR',
+            date: { $gte: currentMonthStart }
+        });
+
+        // Total de reparaciones del mes pasado
+        const repairsLastMonth = await Incident.countDocuments({
+            ...filter,
+            incident_type: 'REPAIR',
+            date: { $gte: lastMonthStart, $lte: lastMonthEnd }
+        });
+
+        // Reparaciones en curso
+        const ongoingRepairs = await Incident.countDocuments({
+            ...filter,
+            incident_type: 'REPAIR',
+            status: { $ne: 'RELEASED' }
+        });
+
+        // Total de mantenimientos de este mes
+        const totalMaintenances = await Incident.countDocuments({
+            ...filter,
+            incident_type: 'MAINTANCE',
+            date: { $gte: currentMonthStart }
+        });
+
+        // Total de mantenimientos del mes pasado
+        const maintenancesLastMonth = await Incident.countDocuments({
+            ...filter,
+            incident_type: 'MAINTANCE',
+            date: { $gte: lastMonthStart, $lte: lastMonthEnd }
+        });
+
+        // Calcular las diferencias, asegurándonos de que la diferencia no sea cero cuando hay datos este mes
+        const incidentsDifference = totalIncidents - incidentsLastMonth;
+        const repairsDifference = totalRepairs - repairsLastMonth;
+        const maintenancesDifference = totalMaintenances - maintenancesLastMonth;
+
+        return {
+            incidents: {
+                total: totalIncidents,
+                difference: incidentsDifference > 0 ? incidentsDifference : 0 // Regresa 0 si la diferencia es negativa o 0
+            },
+            repairs: {
+                total: totalRepairs,
+                difference: repairsDifference > 0 ? repairsDifference : 0 // Regresa 0 si la diferencia es negativa o 0
+            },
+            ongoingRepairs: {
+                total: ongoingRepairs
+            },
+            maintenances: {
+                total: totalMaintenances,
+                difference: maintenancesDifference > 0 ? maintenancesDifference : 0 // Regresa 0 si la diferencia es negativa o 0
+            }
+        };
     }
 }

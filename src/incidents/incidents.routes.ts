@@ -11,6 +11,7 @@ router.get('/incidents-folio', authMiddleware, incidentController.getNewFolio);
 router.post('/incidents', authMiddleware, incidentController.createIncident);
 router.put('/incidents/:id', authMiddleware, incidentController.updateIncident);
 router.delete('/incidents/:id', authMiddleware, incidentController.deleteIncident);
-router.get('/incidents', authMiddleware, incidentController.searchIncidents);
+router.get('/incidents-search', authMiddleware, incidentController.searchIncidents);
+router.get('/dashboard-stats', authMiddleware, incidentController.getDashboardStats);
 
 export default router;
