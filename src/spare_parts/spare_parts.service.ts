@@ -47,7 +47,7 @@ export class SparePartsService {
 
     //Buscar piezas por criterios de busqueda
     async searchSpareParts(searchData: SearchSparePartsDto) {
-        const { name, type, device_type, description, quantity, price } = searchData;
+        const { name, type, device_type, description, price } = searchData;
 
         const filter: any = {};
         if (name) filter.name = { $regex: name, $options: 'i' };
@@ -55,9 +55,10 @@ export class SparePartsService {
         if (device_type && device_type !== 'ALL')
             filter.device_type = { $regex: device_type, $options: 'i' };
         if (description) filter.description = { $regex: description, $options: 'i' };
-        if (quantity) filter.quantity = quantity;
         if (price) filter.price = price;
 
+        // Solo muestra las piezas de repuesto con cantidad mayor a 0
+        filter.quantity = { $gt: 0 };
         return await SparePart.find(filter);
     }
 }

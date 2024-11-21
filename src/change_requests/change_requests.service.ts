@@ -41,23 +41,41 @@ export class ChangeRequestService {
             throw new Error('Device not found');
         }
 
-        if (data.spare_part && data.piece_type && device.specs.hasOwnProperty(data.piece_type)) {
-            (device.specs as any)[data.piece_type] = data.spare_part;
-            device.markModified('specs');
+        if (data.make_request && data.price && data.price < 1000) {
+            data.spare_part = data.name;
+            if (
+                data.spare_part &&
+                data.piece_to_change &&
+                device.specs.hasOwnProperty(data.piece_to_change)
+            ) {
+                (device.specs as any)[data.piece_to_change] = data.spare_part;
+                device.markModified('specs');
+            }
+            await device.save();
+        } else {
+            if (
+                data.spare_part &&
+                data.piece_to_change &&
+                device.specs.hasOwnProperty(data.piece_to_change)
+            ) {
+                (device.specs as any)[data.piece_to_change] = data.spare_part;
+                device.markModified('specs');
+            }
+            await device.save();
+
+            const spareParts = await SparePart.find({ name: data.spare_part });
+
+            if (spareParts.length === 0) {
+                throw new Error('Spare part not found');
+            }
+
+            const sparePart = spareParts[0];
+            sparePart.quantity -= 1;
+            await sparePart.save();
         }
-        await device.save();
-
-        const spareParts = await SparePart.find({ name: data.spare_part });
-
-        if (spareParts.length === 0) {
-            throw new Error('Spare part not found');
-        }
-
-        const sparePart = spareParts[0];
-        sparePart.quantity -= 1;
-        await sparePart.save();
 
         changeRequest.status = 'APPROVED';
+        changeRequest.approval_date = new Date();
         return await changeRequest.save();
     }
 
