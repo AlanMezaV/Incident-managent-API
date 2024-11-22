@@ -4,6 +4,11 @@ import { Types } from 'mongoose';
 import { UserSearchParamsDTO } from './dto/user.dto';
 
 export class UserService {
+    // Obtener usuario por id
+    async getUserById(userId: string) {
+        return await User.findById(userId).select('-password');
+    }
+
     // Actualizar usuario
     async updateUser(userId: string, data: any) {
         const { password, ...rest } = data;

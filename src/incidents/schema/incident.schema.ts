@@ -5,7 +5,6 @@ const incidentSchema = new Schema<IIncident>(
     {
         folio: { type: Number, required: true },
         device_id: { type: Schema.Types.ObjectId, ref: 'Device' },
-        date: { type: Date, required: true },
         start_date: { type: Date },
         end_date: { type: Date },
         arrival_time: { type: String },
@@ -13,6 +12,8 @@ const incidentSchema = new Schema<IIncident>(
         status: { type: String, required: true },
         incident_type: { type: String, required: true },
         work: { type: String, required: true },
+        technician_specialty: { type: String },
+        diagnostic: { type: String },
         description: { type: String, required: true },
         priority: { type: String },
         rejected_reason: { type: String },

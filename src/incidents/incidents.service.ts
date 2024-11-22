@@ -1,4 +1,6 @@
 import { Incident } from './schema/incident.schema';
+import { Device } from '../devices/schema/device.schema';
+import { DeviceStatus } from '../utils/enum/deviceStatus';
 import { PeriodService } from '../periods/periods.service';
 import { CreateIncidentDto, UpdateIncidentDto, SearchIncidentDto } from './dto/incident.dto';
 import moment from 'moment';
@@ -17,15 +19,17 @@ export class IncidentService {
 
     //Obtener Incident por Id
     async getIncidentById(incidentId: string) {
-        return await Incident.findById(incidentId).populate({
-            path: 'device_id',
-            populate: {
-                path: 'location_id',
+        return await Incident.findById(incidentId)
+            .populate({
+                path: 'device_id',
                 populate: {
-                    path: 'building_id'
+                    path: 'location_id',
+                    populate: {
+                        path: 'building_id'
+                    }
                 }
-            }
-        });
+            })
+            .populate('department_id');
     }
 
     async getNewFolio() {
@@ -40,6 +44,20 @@ export class IncidentService {
         const lastFolio = lastIncident ? lastIncident.folio : 0;
         const newFolio = lastFolio + 1;
         const period = await this.periodService.getLastPeriod();
+
+        const device = await Device.findById(incidentData.device_id);
+
+        if (!device) {
+            throw new Error('Device not found');
+        }
+
+        if (incidentData.incident_type === 'MAINTANCE') {
+            device.status = DeviceStatus.MAINTENANCE;
+        } else {
+            device.status = DeviceStatus.REPAIR;
+        }
+
+        device.save();
 
         const newIncident = new Incident({
             ...incidentData,
@@ -60,7 +78,6 @@ export class IncidentService {
 
         incident.folio = incident.folio;
         incident.department_id = incident.department_id;
-        incident.date = incident.date;
         incident.period = incident.period;
         incident.device_id = incident.device_id;
         incident.start_date = data.start_date ?? incident.start_date;
@@ -70,12 +87,42 @@ export class IncidentService {
         incident.status = data.status ?? incident.status;
         incident.incident_type = data.incident_type ?? incident.incident_type;
         incident.work = data.work ?? incident.work;
+        incident.technician_specialty = data.technician_specialty ?? incident.technician_specialty;
+        incident.diagnostic = data.diagnostic ?? incident.diagnostic;
         incident.description = data.description ?? incident.description;
         incident.priority = data.priority ?? incident.priority;
         incident.rejected_reason = data.rejected_reason ?? incident.rejected_reason;
         incident.qualification = data.qualification ?? incident.qualification;
         incident.comments = data.comments ?? incident.comments;
         incident.technician_id = data.technician_id ?? incident.technician_id;
+
+        if (incident.status === 'REJECTED') {
+            const device = await Device.findById(incident.device_id);
+
+            if (!device) {
+                throw new Error('Device not found');
+            }
+
+            if (device.status === DeviceStatus.REPAIR) {
+                device.status = DeviceStatus.INACTIVE;
+            } else if (device.status === DeviceStatus.MAINTENANCE) {
+                device.status = DeviceStatus.ACTIVE;
+            }
+
+            device.save();
+        }
+
+        if (incident.status === 'RELEASED') {
+            const device = await Device.findById(incident.device_id);
+
+            if (!device) {
+                throw new Error('Device not found');
+            }
+
+            device.status = DeviceStatus.ACTIVE;
+
+            device.save();
+        }
 
         return await incident.save();
     }
@@ -122,27 +169,27 @@ export class IncidentService {
         // Total de incidencias de este mes
         const totalIncidents = await Incident.countDocuments({
             ...filter,
-            date: { $gte: currentMonthStart }
+            created_at: { $gte: currentMonthStart }
         });
 
         // Total de incidencias del mes pasado
         const incidentsLastMonth = await Incident.countDocuments({
             ...filter,
-            date: { $gte: lastMonthStart, $lte: lastMonthEnd }
+            created_at: { $gte: lastMonthStart, $lte: lastMonthEnd }
         });
 
         // Total de reparaciones de este mes
         const totalRepairs = await Incident.countDocuments({
             ...filter,
             incident_type: 'REPAIR',
-            date: { $gte: currentMonthStart }
+            created_at: { $gte: currentMonthStart }
         });
 
         // Total de reparaciones del mes pasado
         const repairsLastMonth = await Incident.countDocuments({
             ...filter,
             incident_type: 'REPAIR',
-            date: { $gte: lastMonthStart, $lte: lastMonthEnd }
+            created_at: { $gte: lastMonthStart, $lte: lastMonthEnd }
         });
 
         // Reparaciones en curso
@@ -156,14 +203,14 @@ export class IncidentService {
         const totalMaintenances = await Incident.countDocuments({
             ...filter,
             incident_type: 'MAINTANCE',
-            date: { $gte: currentMonthStart }
+            created_at: { $gte: currentMonthStart }
         });
 
         // Total de mantenimientos del mes pasado
         const maintenancesLastMonth = await Incident.countDocuments({
             ...filter,
             incident_type: 'MAINTANCE',
-            date: { $gte: lastMonthStart, $lte: lastMonthEnd }
+            created_at: { $gte: lastMonthStart, $lte: lastMonthEnd }
         });
 
         // Calcular las diferencias, asegurándonos de que la diferencia no sea cero cuando hay datos este mes

@@ -19,6 +19,8 @@ export class UpdateIncidentDto {
     status?: string;
     incident_type?: string;
     work?: string;
+    technician_specialty?: string;
+    diagnostic?: string;
     description?: string;
     priority?: string;
     rejected_reason?: string;

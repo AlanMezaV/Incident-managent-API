@@ -10,6 +10,23 @@ export class UserController {
         this.userService = new UserService();
     }
 
+    // Obtener usuario por id
+    getUserById = async (req: Request, res: Response) => {
+        try {
+            const user = await this.userService.getUserById(req.params.id);
+            if (user) {
+                res.status(StatusCodes.OK).json(user);
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' });
+            }
+        } catch (error) {
+            console.error('Error getting user by id:', error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: 'Internal server error'
+            });
+        }
+    };
+
     // Actualizar usuario
     updateUser = async (req: Request, res: Response) => {
         try {
