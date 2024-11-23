@@ -15,5 +15,6 @@ router.get(
     authMiddleware,
     userController.userDepartmentOptions
 );
+router.get('/technicians', authMiddleware, userController.getTechniciansSpecialist);
 
 export default router;

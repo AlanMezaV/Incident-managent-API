@@ -1,4 +1,5 @@
 import { User } from './schema/user.schema';
+import { Incident } from '../incidents/schema/incident.schema';
 import { SecurityService } from '../utils/security';
 import { Types } from 'mongoose';
 import { UserSearchParamsDTO } from './dto/user.dto';
@@ -55,5 +56,27 @@ export class UserService {
         return await User.find({ department_id: new Types.ObjectId(departmentId) }).select(
             '-password'
         );
+    }
+
+    // Obtener técnicos especialistas
+    async getTechniciansSpecialist(position: string) {
+        const technicians = await User.find({ position, role: 'TECHNICIAN' }).select('-password');
+
+        //Ordenar por cantidad de incidencias que tienen asignadas
+        const incidentsPerTechnician = await Incident.aggregate([
+            {
+                $match: {
+                    technician_id: { $in: technicians.map(t => t._id) },
+                    status: { $ne: 'RESOLVED' }
+                }
+            }
+        ]);
+
+        const techniciansWithIncidents = technicians.map(t => {
+            const incidents = incidentsPerTechnician.filter(i => i.technician_id.equals(t._id));
+            return { ...t.toObject(), incidents: incidents.length };
+        });
+
+        return techniciansWithIncidents.sort((a, b) => a.incidents - b.incidents);
     }
 }

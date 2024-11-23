@@ -13,5 +13,9 @@ router.put('/incidents/:id', authMiddleware, incidentController.updateIncident);
 router.delete('/incidents/:id', authMiddleware, incidentController.deleteIncident);
 router.get('/incidents-search', authMiddleware, incidentController.searchIncidents);
 router.get('/dashboard-stats', authMiddleware, incidentController.getDashboardStats);
-
+router.get(
+    '/technician-qualification',
+    authMiddleware,
+    incidentController.getTechnicianAverageQualification
+);
 export default router;

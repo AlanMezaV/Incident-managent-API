@@ -2,6 +2,7 @@ import { Device } from './schema/device.schema';
 import { Location } from '../locations/schema/location.schema';
 import { CreateDeviceDTO, UpdateDeviceDTO, DeviceSearchParamsDTO } from './dto/device.dto';
 import { validateSpecs } from '../utils/validations/devicesValidations';
+import { DeviceStatus } from '../utils/enum/deviceStatus';
 
 export class DeviceService {
     //Obtener dispositivos
@@ -106,13 +107,29 @@ export class DeviceService {
 
         const locationIds = locations.map(location => location._id);
 
-        return await Device.find({ location_id: { $in: locationIds } })
-            .populate('location_id')
-            .countDocuments();
+        const devicesWorking = await Device.find({
+            status: DeviceStatus.ACTIVE,
+            location_id: { $in: locationIds }
+        }).countDocuments();
+
+        const devicesNumber = await Device.find({
+            location_id: { $in: locationIds }
+        }).countDocuments();
+
+        const activePercentage = (devicesWorking / devicesNumber) * 100;
+        return { devicesNumber, activePercentage, devicesWorking };
     }
 
     //Obtener numero de dispositivos
     async getNumberDevices() {
-        return await Device.countDocuments();
+        const devicesWorking = await Device.find({
+            status: DeviceStatus.ACTIVE
+        }).countDocuments();
+
+        const devicesNumber = await Device.find().countDocuments();
+
+        const activePercentage = (devicesWorking / devicesNumber) * 100;
+
+        return { devicesNumber, activePercentage };
     }
 }

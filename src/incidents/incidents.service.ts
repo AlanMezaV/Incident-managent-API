@@ -161,59 +161,52 @@ export class IncidentService {
             filter.technician_id = technicianId;
         }
 
-        // Fecha actual y fecha del mes pasado usando moment
         const currentMonthStart = moment().startOf('month').toDate();
         const lastMonthStart = moment().subtract(1, 'months').startOf('month').toDate();
         const lastMonthEnd = moment().subtract(1, 'months').endOf('month').toDate();
 
-        // Total de incidencias de este mes
         const totalIncidents = await Incident.countDocuments({
             ...filter,
             created_at: { $gte: currentMonthStart }
         });
 
-        // Total de incidencias del mes pasado
         const incidentsLastMonth = await Incident.countDocuments({
             ...filter,
             created_at: { $gte: lastMonthStart, $lte: lastMonthEnd }
         });
 
-        // Total de reparaciones de este mes
         const totalRepairs = await Incident.countDocuments({
             ...filter,
             incident_type: 'REPAIR',
             created_at: { $gte: currentMonthStart }
         });
 
-        // Total de reparaciones del mes pasado
         const repairsLastMonth = await Incident.countDocuments({
             ...filter,
             incident_type: 'REPAIR',
+            status: { $ne: 'REJECTED' },
             created_at: { $gte: lastMonthStart, $lte: lastMonthEnd }
         });
 
-        // Reparaciones en curso
         const ongoingRepairs = await Incident.countDocuments({
             ...filter,
             incident_type: 'REPAIR',
             status: { $ne: 'RELEASED' }
         });
 
-        // Total de mantenimientos de este mes
         const totalMaintenances = await Incident.countDocuments({
             ...filter,
             incident_type: 'MAINTANCE',
+            status: { $ne: 'REJECTED' },
             created_at: { $gte: currentMonthStart }
         });
 
-        // Total de mantenimientos del mes pasado
         const maintenancesLastMonth = await Incident.countDocuments({
             ...filter,
             incident_type: 'MAINTANCE',
             created_at: { $gte: lastMonthStart, $lte: lastMonthEnd }
         });
 
-        // Calcular las diferencias, asegurándonos de que la diferencia no sea cero cuando hay datos este mes
         const incidentsDifference = totalIncidents - incidentsLastMonth;
         const repairsDifference = totalRepairs - repairsLastMonth;
         const maintenancesDifference = totalMaintenances - maintenancesLastMonth;
@@ -221,19 +214,39 @@ export class IncidentService {
         return {
             incidents: {
                 total: totalIncidents,
-                difference: incidentsDifference > 0 ? incidentsDifference : 0 // Regresa 0 si la diferencia es negativa o 0
+                difference: incidentsDifference > 0 ? incidentsDifference : 0
             },
             repairs: {
                 total: totalRepairs,
-                difference: repairsDifference > 0 ? repairsDifference : 0 // Regresa 0 si la diferencia es negativa o 0
+                difference: repairsDifference > 0 ? repairsDifference : 0
             },
             ongoingRepairs: {
                 total: ongoingRepairs
             },
             maintenances: {
                 total: totalMaintenances,
-                difference: maintenancesDifference > 0 ? maintenancesDifference : 0 // Regresa 0 si la diferencia es negativa o 0
+                difference: maintenancesDifference > 0 ? maintenancesDifference : 0
             }
         };
+    }
+
+    // Obtener promedio de calificación de un técnico
+    async getTechnicianAverageQualification(technicianId?: string) {
+        const completedIncidents = await Incident.find({
+            technician_id: technicianId,
+            status: 'RELEASED'
+        });
+
+        if (completedIncidents.length === 0) {
+            return { technicianId, averageQualification: 0 };
+        }
+
+        const totalQualification = completedIncidents.reduce((sum, incident) => {
+            return sum + (incident.qualification || 0);
+        }, 0);
+
+        const qualification = totalQualification / completedIncidents.length;
+
+        return { qualification };
     }
 }

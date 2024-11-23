@@ -145,4 +145,20 @@ export class IncidentController {
             });
         }
     };
+
+    // Obtener promedio de calificación de un técnico
+    getTechnicianAverageQualification = async (req: Request, res: Response) => {
+        const { technician_id } = req.query;
+        try {
+            const rating = await this.incidentService.getTechnicianAverageQualification(
+                technician_id as string
+            );
+            res.status(StatusCodes.OK).json(rating);
+        } catch (error) {
+            console.error('Error getting technician rating:', error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: 'Internal server error'
+            });
+        }
+    };
 }

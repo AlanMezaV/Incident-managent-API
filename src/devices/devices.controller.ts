@@ -134,7 +134,7 @@ export class DeviceController {
             const totalDevices = await this.deviceService.getNumberDevicesByDepartment(
                 departmentId
             );
-            res.status(StatusCodes.OK).json({ totalDevices });
+            res.status(StatusCodes.OK).json(totalDevices);
         } catch (error) {
             console.error('Error getting number of devices by department:', error);
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -147,7 +147,7 @@ export class DeviceController {
     getNumberDevices = async (req: Request, res: Response) => {
         try {
             const totalDevices = await this.deviceService.getNumberDevices();
-            res.status(StatusCodes.OK).json({ totalDevices });
+            res.status(StatusCodes.OK).json(totalDevices);
         } catch (error) {
             console.error('Error getting number of devices:', error);
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({

@@ -112,4 +112,18 @@ export class UserController {
             });
         }
     };
+
+    // Obtener técnicos por especialidad
+    getTechniciansSpecialist = async (req: Request, res: Response) => {
+        const { position } = req.query;
+        try {
+            const technicians = await this.userService.getTechniciansSpecialist(position as string);
+            res.status(StatusCodes.OK).json(technicians);
+        } catch (error) {
+            console.error('Error getting technicians:', error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: 'Internal server error'
+            });
+        }
+    };
 }
