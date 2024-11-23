@@ -139,8 +139,9 @@ export class IncidentService {
         if (query.folio) filter.folio = query.folio;
         if (query.device_id) filter.device_id = query.device_id;
         if (query.date) filter.date = query.date;
-        if (query.status) filter.status = { $regex: query.status, $options: 'i' };
-        if (query.incident_type)
+        if (query.status && query.status !== 'ALL')
+            filter.status = { $regex: query.status, $options: 'i' };
+        if (query.incident_type && query.incident_type !== 'ALL')
             filter.incident_type = { $regex: query.incident_type, $options: 'i' };
         if (query.work) filter.work = { $regex: query.work, $options: 'i' };
         if (query.priority) filter.priority = query.priority;
