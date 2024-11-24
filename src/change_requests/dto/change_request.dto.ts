@@ -27,4 +27,5 @@ export class ChangeRequestSearchParamsDTO {
     device_type?: string;
     status?: string;
     approval_date?: Date;
+    technician_id?: string;
 }

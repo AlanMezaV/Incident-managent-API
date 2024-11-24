@@ -24,7 +24,15 @@ export class ChangeRequestService {
     async createChangeRequest(data: CreateChangeRequestDTO) {
         const changeRequest = new ChangeRequest(data);
 
-        if (data.make_request && data.price && data.price > 1000) {
+        const sparePartRequest = await SparePart.find({ name: data.spare_part });
+
+        if (!data.price && sparePartRequest) {
+            data.price = sparePartRequest[0].price;
+        }
+
+        if (data.price && data.price > 1000) {
+            changeRequest.make_request = true;
+            changeRequest.price = data.price;
             changeRequest.status = 'SENT';
             return await changeRequest.save();
         }
@@ -63,17 +71,11 @@ export class ChangeRequestService {
             }
             await device.save();
 
-            const spareParts = await SparePart.find({ name: data.spare_part });
-
-            if (spareParts.length === 0) {
-                throw new Error('Spare part not found');
-            }
-
-            const sparePart = spareParts[0];
+            const sparePart = sparePartRequest[0];
             sparePart.quantity -= 1;
             await sparePart.save();
         }
-
+        changeRequest.price = data.price ?? 0;
         changeRequest.status = 'APPROVED';
         changeRequest.approval_date = new Date();
         return await changeRequest.save();
@@ -124,11 +126,37 @@ export class ChangeRequestService {
             changeRequest.piece_type &&
             device.specs.hasOwnProperty(changeRequest.piece_type)
         ) {
-            (device.specs as any)[changeRequest.piece_type] = changeRequest.name;
-            device.markModified('specs');
-        }
+            changeRequest.spare_part = changeRequest.name;
+            if (
+                changeRequest.spare_part &&
+                changeRequest.piece_to_change &&
+                device.specs.hasOwnProperty(changeRequest.piece_to_change)
+            ) {
+                (device.specs as any)[changeRequest.piece_to_change] = changeRequest.spare_part;
+                device.markModified('specs');
+            }
+            await device.save();
+        } else {
+            if (
+                changeRequest.spare_part &&
+                changeRequest.piece_to_change &&
+                device.specs.hasOwnProperty(changeRequest.piece_to_change)
+            ) {
+                (device.specs as any)[changeRequest.piece_to_change] = changeRequest.spare_part;
+                device.markModified('specs');
+            }
+            await device.save();
 
-        await device.save();
+            const spareParts = await SparePart.find({ name: changeRequest.spare_part });
+
+            if (spareParts.length === 0) {
+                throw new Error('Spare part not found');
+            }
+
+            const sparePart = spareParts[0];
+            sparePart.quantity -= 1;
+            await sparePart.save();
+        }
 
         changeRequest.status = 'APPROVED';
         changeRequest.approval_date = new Date();
@@ -155,7 +183,9 @@ export class ChangeRequestService {
 
     //Buscar ChangeRequest por criterios de busqueda
     async searchChangeRequests(query: ChangeRequestSearchParamsDTO) {
-        const { piece_to_change, spare_part, device_type, status, approval_date } = query;
+        const { piece_to_change, spare_part, device_type, status, approval_date, technician_id } =
+            query;
+
         const filter: any = {};
 
         if (piece_to_change) filter.piece_to_change = { $regex: piece_to_change, $options: 'i' };
@@ -163,6 +193,10 @@ export class ChangeRequestService {
         if (device_type) filter.device_type = { $regex: device_type, $options: 'i' };
         if (status) filter.status = { $regex: status, $options: 'i' };
         if (approval_date) filter.approval_date = approval_date;
+
+        if (technician_id) {
+            filter.incident = await Incident.find({ technician_id }).select('_id');
+        }
 
         return await ChangeRequest.find(filter).populate({
             path: 'incident',
