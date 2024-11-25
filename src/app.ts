@@ -14,6 +14,7 @@ import PeriodsRoutes from './periods/periods.routes';
 import IncidentsRoutes from './incidents/incidents.routes';
 import SparePartsRoutes from './spare_parts/spare_parts.routes';
 import ChangeRequestsRoutes from './change_requests/change_requests.routes';
+import ServicesRoutes from './services/services.routes';
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.use('/', PeriodsRoutes);
 app.use('/', IncidentsRoutes);
 app.use('/', SparePartsRoutes);
 app.use('/', ChangeRequestsRoutes);
+app.use('/', ServicesRoutes);
 
 // Error handling
 app.use((req, res, next) => {

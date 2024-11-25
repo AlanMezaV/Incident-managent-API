@@ -53,6 +53,12 @@ const initialSidebarOptions: CreateSidebarOptionsDto[] = [
         roles: [roles.ADMIN_TECHNICIANS, roles.TECHNICIAN]
     },
     {
+        route: '/services',
+        name: 'Servicios',
+        icon: 'Book',
+        roles: [roles.ADMIN_TECHNICIANS, roles.TECHNICIAN]
+    },
+    {
         route: '/incident',
         name: 'Incidencias',
         icon: 'Incidents',
