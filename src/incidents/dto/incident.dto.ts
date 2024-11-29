@@ -25,6 +25,9 @@ export class UpdateIncidentDto {
     priority?: string;
     rejected_reason?: string;
     qualification?: number;
+    isProblem?: boolean;
+    root_cause?: string;
+    problem_solution?: string;
     comments?: string;
     technician_id?: Types.ObjectId;
 }
@@ -37,6 +40,7 @@ export class SearchIncidentDto {
     incident_type?: string;
     work?: string;
     priority?: string;
+    isProblem?: boolean;
     department_id?: Types.ObjectId;
     technician_id?: Types.ObjectId;
     period?: number;

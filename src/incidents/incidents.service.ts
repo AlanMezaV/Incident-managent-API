@@ -95,6 +95,9 @@ export class IncidentService {
         incident.qualification = data.qualification ?? incident.qualification;
         incident.comments = data.comments ?? incident.comments;
         incident.technician_id = data.technician_id ?? incident.technician_id;
+        incident.isProblem = data.isProblem ?? incident.isProblem;
+        incident.problem_solution = data.problem_solution ?? incident.problem_solution;
+        incident.root_cause = data.root_cause ?? incident.root_cause;
 
         if (incident.status === 'REJECTED') {
             const device = await Device.findById(incident.device_id);
@@ -148,6 +151,7 @@ export class IncidentService {
         if (query.department_id) filter.department_id = query.department_id;
         if (query.technician_id) filter.technician_id = query.technician_id;
         if (query.period) filter.period = query.period;
+        if (query.isProblem) filter.isProblem = query.isProblem;
 
         return await Incident.find(filter);
     }

@@ -18,6 +18,9 @@ export interface IIncident {
     qualification: number;
     comments: string;
     period: number;
+    isProblem: boolean;
+    root_cause: string;
+    problem_solution: string;
     technician_id: Types.ObjectId;
     department_id: Types.ObjectId;
 }

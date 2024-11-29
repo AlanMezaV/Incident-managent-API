@@ -20,6 +20,9 @@ const incidentSchema = new Schema<IIncident>(
         qualification: { type: Number },
         comments: { type: String },
         period: { type: Number, required: true },
+        isProblem: { type: Boolean },
+        root_cause: { type: String },
+        problem_solution: { type: String },
         technician_id: { type: Schema.Types.ObjectId, ref: 'User' },
         department_id: { type: Schema.Types.ObjectId, ref: 'Department', required: true }
     },
