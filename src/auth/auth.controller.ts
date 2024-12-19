@@ -94,7 +94,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const logout = async (req: Request, res: Response): Promise<Response> => {
-    res.clearCookie('token', { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+    res.clearCookie('token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'none'
+    });
     return res.status(200).json({ message: 'Session finished' });
 };
 
@@ -103,23 +107,19 @@ export const verifyToken = async (req: Request, res: Response): Promise<void> =>
 
     if (!token) {
         res.status(StatusCodes.UNAUTHORIZED).json({
-            valid: false
+            valid: false,
+            message: 'No token provided'
         });
         return;
     }
 
     try {
-        const decoded = verifyTokenJWT(token);
-        if (!decoded) {
-            res.status(StatusCodes.UNAUTHORIZED).json({
-                valid: false
-            });
-            throw new Error('Invalid token');
-        }
+        verifyTokenJWT(token);
         res.status(StatusCodes.OK).json({ valid: true });
     } catch (error) {
         res.status(StatusCodes.UNAUTHORIZED).json({
-            valid: false
+            valid: false,
+            message: 'Invalid or expired token'
         });
     }
 };
