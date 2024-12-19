@@ -22,10 +22,11 @@ const app = express();
 app.use(morgan('dev'));
 app.use(express.json());
 const corsOptions = {
-    origin: 'http://incident-managent-api-production.up.railway.app',
+    origin: ['http://localhost:5173', 'http://incident-managent-api-production.up.railway.app'],
     credentials: true
 };
 app.use(cors(corsOptions));
+
 app.use(cookieParser());
 
 // Routes
