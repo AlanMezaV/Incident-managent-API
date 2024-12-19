@@ -21,10 +21,22 @@ const app = express();
 // Middlewares
 app.use(morgan('dev'));
 app.use(express.json());
+
+const allowedOrigins = ['https://incident-deploy.vercel.app', 'http://localhost:5173'];
 const corsOptions = {
-    origin: 'https://incident-deploy.vercel.app',
+    origin: function (
+        origin: string | undefined,
+        callback: (err: Error | null, allow?: boolean) => void
+    ) {
+        if ((origin && allowedOrigins.includes(origin)) || !origin) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true
 };
+
 app.use(cors(corsOptions));
 app.use(cookieParser());
 
