@@ -22,7 +22,7 @@ const app = express();
 app.use(morgan('dev'));
 app.use(express.json());
 const corsOptions = {
-    origin: 'https://incident-deploy.vercel.app/',
+    origin: 'https://incident-deploy.vercel.app',
     credentials: true
 };
 app.use(cors(corsOptions));
