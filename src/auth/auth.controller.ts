@@ -94,7 +94,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const logout = async (req: Request, res: Response): Promise<Response> => {
-    res.clearCookie('token');
+    res.clearCookie('token', { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
     return res.status(200).json({ message: 'Session finished' });
 };
 
@@ -135,11 +135,10 @@ export const updatePhoto = async (req: Request, res: Response): Promise<void> =>
             return;
         }
 
-        // Subir la imagen a Cloudinary
         let imageUrl: string | undefined;
         if (req.file) {
             const result = await cloudinary.uploader.upload(req.file.path);
-            imageUrl = result.secure_url; // URL de la imagen subida
+            imageUrl = result.secure_url;
         }
 
         if (imageUrl) {
