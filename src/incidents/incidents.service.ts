@@ -153,7 +153,7 @@ export class IncidentService {
         if (query.period) filter.period = query.period;
         if (query.isProblem) filter.isProblem = query.isProblem;
 
-        return await Incident.find(filter);
+        return await Incident.find(filter).populate('device_id').populate('department_id');
     }
 
     async getDashboardStats(departmentId: string, technicianId: string) {
